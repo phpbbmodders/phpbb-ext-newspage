@@ -1,9 +1,12 @@
-# phpBB 3.1 Newspage Extension
+# NV Newspage Extension
 
-NV Newspage is an Extension for [phpBB 3.1](https://www.phpbb.com/)
+An independent continuation of NV Newspage for [phpBB](https://www.phpbb.com/), maintained under phpbbmodders.
 
-[![Build Status](https://travis-ci.org/nickv-phpbb/phpbb-ext-newspage.svg?branch=3.1.x)](https://travis-ci.org/nickv-phpbb/phpbb-ext-newspage)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/nickv-phpbb/phpbb-ext-newspage/badges/quality-score.png?b=3.1.x)](https://scrutinizer-ci.com/g/nickv-phpbb/phpbb-ext-newspage/?branch=3.1.x)
+## Compatibility
+
+The imported code targets phpBB 3.1. Work toward phpBB 3.3 support is planned; compatibility has not yet been implemented or verified. Do not install this development branch on a production board.
+
+The original branches and release tags are preserved as historical upstream snapshots. They do not represent phpbbmodders releases or phpBB 3.3 support.
 
 
 ## Description
@@ -17,7 +20,7 @@ Also the icons can be switched on/off (post icons, user icons)
 
 Clone into phpBB/ext/nickvergessen/newspage:
 
-    git clone https://github.com/nickv-phpbb/phpbb-ext-newspage.git phpBB/ext/nickvergessen/newspage
+    git clone https://github.com/phpbbmodders/phpbb-ext-newspage.git phpBB/ext/nickvergessen/newspage
 
 Set up the dependencies:
 
@@ -31,21 +34,26 @@ Go to "ACP" > "Customise" > "Extensions" and enable the "phpBB 3.1 NV Newspage E
 See the [documentation](docs/events.md) for a list of available php and template events.
 
 
-## Live Installation
-
-If you want to install the extension in a live board, please only use official releases.
-Note that github releases are **NOT** the releases you are looking for.
-
-
-## Collaborate
-
-* Create a issue in the [tracker](https://github.com/nickv-phpbb/phpbb-ext-newspage/issues)
-* Submit a [pull-request](https://github.com/nickv-phpbb/phpbb-ext-newspage/pulls)
-
-
 ## Testing
 
-We use Travis-CI as a continuous integration server and phpunit for our unit testing. See more information on the [phpBB development wiki](https://wiki.phpbb.com/Unit_Tests).
+GitHub Actions checks PHP syntax. This does not establish phpBB runtime compatibility. The imported PHPUnit suite and Travis configuration target phpBB 3.1 and need updating before they can validate the 3.3 port.
+
+## TODO
+
+Ideas not yet built, practical and speculative alike: [`docs/TODO.md`](docs/TODO.md).
+
+## Contributing
+
+Contributions are welcome!
+
+- **Bug reports**: [Open an issue](https://github.com/phpbbmodders/phpbb-ext-newspage/issues).
+- **Everything else** (questions, feature requests, ideas, general discussion): [Use Discussions](https://github.com/phpbbmodders/phpbb-ext-newspage/discussions).
+- Pull requests are welcome for bug fixes or discussed features.
+
+## Acknowledgments
+
+- Based on [nickv-phpbb/phpbb-ext-newspage](https://github.com/nickv-phpbb/phpbb-ext-newspage), originally developed by Joas Schilling (nickvergessen). Original history, authorship, and licensing are preserved.
+- Code review and documentation assisted by [Codex](https://www.anthropic.com/Codex).
 
 
 ## License
