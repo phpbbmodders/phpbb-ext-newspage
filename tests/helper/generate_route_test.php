@@ -21,7 +21,7 @@ use nickvergessen\newspage\helper;
  *
  * @package nickvergessen\newspage\tests\helper
  */
-class generate_route_test extends \phpbb_test_case
+class generate_route_test extends \PHPUnit\Framework\TestCase
 {
 	/**
 	 * @return array

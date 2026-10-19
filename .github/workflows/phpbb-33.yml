@@ -1,0 +1,71 @@
+name: phpBB 3.3 compatibility
+
+on:
+  push:
+    branches: [main, phpbb-3.3]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '7.2'
+            phpunit: '8.5'
+          - php: '8.4'
+            phpunit: '9.6'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, mbstring, sqlite3
+          tools: composer:v2, phpunit:${{ matrix.phpunit }}
+          coverage: none
+      - name: Validate metadata
+        run: composer validate --strict --no-check-publish
+      - name: Prepare phpBB 3.3.19
+        env:
+          BOARD_DIR: ${{ runner.temp }}/newspage-board
+        run: |
+          set -euo pipefail
+          mkdir -p "$BOARD_DIR"
+          cd "$BOARD_DIR"
+          release=https://download.phpbb.com/pub/release/3.3/3.3.19/phpBB-3.3.19.zip
+          curl --fail --location --max-time 180 -o phpBB-3.3.19.zip "$release"
+          curl --fail --location --max-time 30 -o phpBB-3.3.19.zip.sha256 "$release.sha256"
+          sha256sum --check phpBB-3.3.19.zip.sha256
+          unzip -q phpBB-3.3.19.zip
+          mkdir -p phpBB3/ext/nickvergessen/newspage
+          git -C "$GITHUB_WORKSPACE" archive HEAD | tar -x -C phpBB3/ext/nickvergessen/newspage
+          echo "PHPBB_ROOT=$BOARD_DIR/phpBB3" >> "$GITHUB_ENV"
+      - name: Unit and trimming regression tests
+        run: |
+          phpunit -c phpunit.xml.dist
+          php tests/compatibility.php "$PHPBB_ROOT"
+      - name: Install disposable board
+        run: |
+          php tests/prepare_board.php "$PHPBB_ROOT"
+          cd "$PHPBB_ROOT"
+          php install/phpbbcli.php install store/newspage-install.yml -n
+          mv install install.disabled
+      - name: Extension lifecycle and rendering
+        run: |
+          set -euo pipefail
+          cli="$PHPBB_ROOT/bin/phpbbcli.php"
+          php "$cli" extension:enable nickvergessen/newspage
+          php tests/runtime.php "$PHPBB_ROOT" enabled
+          php "$cli" extension:disable nickvergessen/newspage
+          php "$cli" extension:enable nickvergessen/newspage
+          php tests/runtime.php "$PHPBB_ROOT" preserved
+          php "$cli" extension:disable nickvergessen/newspage
+          php "$cli" extension:purge nickvergessen/newspage
+          php tests/runtime.php "$PHPBB_ROOT" purged
+          php "$cli" extension:enable nickvergessen/newspage
+          php tests/runtime.php "$PHPBB_ROOT" enabled

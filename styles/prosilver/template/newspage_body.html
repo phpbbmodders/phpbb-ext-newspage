@@ -2,16 +2,15 @@
 
 <!-- EVENT nickvergessen_newspage_before -->
 
-<h2><!-- IF NEWS_ONLY --><a href="{postrow.U_NEWS}">{NEWS_TITLE}</a><!-- ELSE -->{L_NEWS}<!-- ENDIF --></h2>
+<h2><!-- IF NEWS_ONLY -->{NEWS_TITLE}<!-- ELSE -->{L_NEWS}<!-- ENDIF --></h2>
 <!-- EVENT nickvergessen_newspage_title_after -->
 
-<!-- IF .archive_block or .cat_block or (PAGE_NUMBER and PAGINATION) or TOTAL_NEWS -->
+<!-- IF .archive_block or .cat_block or .pagination or TOTAL_NEWS -->
 <br />
 <!-- EVENT nickvergessen_newspage_filters_before -->
 <div class="action-bar">
 	<!-- INCLUDE newspage_categories_dropdown.html -->
 	<!-- INCLUDE newspage_archives_dropdown.html -->
-	<!-- INCLUDE newspage_settings.html -->
 
 	<!-- IF (PAGE_NUMBER and PAGINATION) or TOTAL_NEWS -->
 	<div class="pagination">

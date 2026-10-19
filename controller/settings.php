@@ -76,6 +76,20 @@ class settings
 			throw new http_exception(400, 'FORM_INVALID');
 		}
 
+		$this->save_settings();
+
+		$this->user->add_lang_ext('nickvergessen/newspage', 'newspage');
+		return $this->helper->message('NEWS_SAVED');
+	}
+
+	/** Save settings after the calling administrator form validates its token. */
+	public function save_settings()
+	{
+		if (!$this->auth->acl_get('a_board'))
+		{
+			throw new http_exception(403, 'NO_AUTH_OPERATION');
+		}
+
 		if ($this->request->variable('news_char_limit', 0) !== 0)
 		{
 			$this->config->set('news_char_limit',	max(100, $this->request->variable('news_char_limit', 0)));
@@ -95,9 +109,6 @@ class settings
 		$this->config->set('news_attach_show',	$this->request->variable('news_attach_show', false));
 		$this->config->set('news_cat_show',		$this->request->variable('news_cat_show', false));
 		$this->config->set('news_archive_show',	$this->request->variable('news_archive_show', false));
-
-		$this->user->add_lang_ext('nickvergessen/newspage', 'newspage');
-		return $this->helper->message('NEWS_SAVED');
 	}
 
 	/**

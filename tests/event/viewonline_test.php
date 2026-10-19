@@ -25,7 +25,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  *
  * @package nickvergessen\newspage\tests\event
  */
-class viewonline_test extends \phpbb_test_case
+class viewonline_test extends \PHPUnit\Framework\TestCase
 {
 	/** @var user */
 	protected $user;

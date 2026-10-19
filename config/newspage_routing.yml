@@ -1,7 +1,3 @@
-nickvergessen_newspage_settings:
-    path: /settings
-    defaults: { _controller: nickvergessen.newspage.controller.settings:manage }
-
 nickvergessen_newspage_page_controller:
     path: /page/{page}
     defaults: { _controller: nickvergessen.newspage.controller:newspage, forum_id: 0, year: 0, month: 0 }

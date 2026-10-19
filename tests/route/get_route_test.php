@@ -21,7 +21,7 @@ use phpbb\config\config;
  *
  * @package nickvergessen\newspage\tests\route
  */
-class get_route_test extends \phpbb_test_case
+class get_route_test extends \PHPUnit\Framework\TestCase
 {
 	/**
 	 * @return array

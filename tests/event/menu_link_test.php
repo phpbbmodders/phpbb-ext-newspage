@@ -24,7 +24,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  *
  * @package nickvergessen\newspage\tests\event
  */
-class menu_link_test extends \phpbb_test_case
+class menu_link_test extends \PHPUnit\Framework\TestCase
 {
 	/** @var \PHPUnit_Framework_MockObject_MockObject */
 	protected $template;
@@ -35,7 +35,7 @@ class menu_link_test extends \phpbb_test_case
 	/**
 	 * @return null
 	 */
-	public function setup_listener()
+	public function setup_listener($icon = 'fa-bullhorn')
 	{
 		$this->template = $template = $this->getMockBuilder('\phpbb\template\template')
 			->getMock();
@@ -56,7 +56,8 @@ class menu_link_test extends \phpbb_test_case
 				$controller_helper,
 				new config(array())
 			),
-			$template
+			$template,
+			new config(array('news_icon' => $icon))
 		);
 	}
 
@@ -141,14 +142,21 @@ class menu_link_test extends \phpbb_test_case
 	/**
 	 * @return null
 	 */
-	public function test_add_page_header_link()
+	public function icon_data()
 	{
-		$this->setup_listener();
+		return array(array('fa-bullhorn'), array('fa-newspaper-o'));
+	}
+
+	/** @dataProvider icon_data */
+	public function test_add_page_header_link($icon)
+	{
+		$this->setup_listener($icon);
 
 		$this->template->expects($this->once())
 			->method('assign_vars')
 			->with(array(
-				'U_NEWSPAGE' => 'nickvergessen_newspage_controller#a:0:{}'
+				'U_NEWSPAGE' => 'nickvergessen_newspage_controller#a:0:{}',
+				'NEWSPAGE_ICON' => $icon,
 			));
 
 		$dispatcher = new EventDispatcher();

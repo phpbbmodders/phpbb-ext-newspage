@@ -72,11 +72,7 @@ class main
 		$this->root_path = $root_path;
 		$this->php_ext = $php_ext;
 
-		if (!class_exists('bbcode'))
-		{
-			include($this->root_path . 'includes/bbcode.' . $this->php_ext);
-		}
-		if (!function_exists('get_user_rank'))
+		if (!function_exists('phpbb_get_user_rank'))
 		{
 			include($this->root_path . 'includes/functions_display.' . $this->php_ext);
 		}
@@ -117,6 +113,11 @@ class main
 			'page',
 		);
 		extract($this->dispatcher->trigger_event('nickvergessen.newspage.newspage', compact($vars)));
+
+		if ($page < 1 || $month < 0 || $month > 12 || ($year && !$month) || (!$year && $month))
+		{
+			throw new \phpbb\exception\http_exception(404, 'NO_NEWS');
+		}
 
 		$this->newspage->set_category($forum_id)
 			->set_archive($year, $month)
@@ -177,8 +178,7 @@ class main
 		}
 
 		$this->newspage->base();
-		// $this->assign_images($this->config['news_user_info'], $this->config['news_post_buttons']);
-		$this->assign_images(true, true);
+		$this->assign_images($this->config['news_user_info'], $this->config['news_post_buttons']);
 
 		$this->template->assign_vars(array(
 			'S_ON_NEWSPAGE'		=> true,

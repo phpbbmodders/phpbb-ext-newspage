@@ -28,6 +28,9 @@ Set up the dependencies:
 
 Go to "ACP" > "Customise" > "Extensions" and enable the "phpBB 3.1 NV Newspage Extension" extension.
 
+Configure Newspage under "ACP" > "Extensions" > "Newspage" > "Settings". Existing news settings are preserved when upgrading.
+The News navigation link defaults to the Font Awesome megaphone (`fa-bullhorn`). Its icon class can be changed on the same settings page.
+
 
 ## List of events
 

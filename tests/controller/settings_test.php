@@ -18,15 +18,13 @@ use phpbb\exception\http_exception;
 use phpbb\request\request_interface;
 use Symfony\Component\HttpFoundation\Response;
 
-require __DIR__ . '/../../../../../includes/functions.php';
-
 /**
  * Class settings_test
  * Testing \nickvergessen\newspage\controller\settings
  *
  * @package nickvergessen\newspage\tests\controller
  */
-class settings_test extends \phpbb_test_case
+class settings_test extends \PHPUnit\Framework\TestCase
 {
 	/**
 	 * @return array
@@ -156,15 +154,13 @@ class settings_test extends \phpbb_test_case
 		global $request;
 
 		$_POST['creation_time'] = $_POST['form_token'] = 0;
-		define('DEBUG_TEST', true);
-
-		$auth = $this->getMock('\phpbb\auth\auth');
+		$auth = $this->createMock('\phpbb\auth\auth');
 		$auth->expects($this->any())
 			->method('acl_get')
 			->with($this->stringContains('_'), $this->anything())
 			->will($this->returnValueMap($auth_map));
 
-		$request = $this->getMock('\phpbb\request\request');
+		$request = $this->createMock('\phpbb\request\request');
 		$request->expects($this->any())
 			->method('is_set_post')
 			->with($this->anything())

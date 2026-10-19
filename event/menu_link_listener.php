@@ -28,6 +28,9 @@ class menu_link_listener implements EventSubscriberInterface
 	/* @var \phpbb\template\template */
 	protected $template;
 
+	/** @var \phpbb\config\config */
+	protected $config;
+
 	/**
 	 * Register to the events
 	 *
@@ -46,11 +49,13 @@ class menu_link_listener implements EventSubscriberInterface
 	 *
 	 * @param \nickvergessen\newspage\helper $helper
 	 * @param \phpbb\template\template $template
+	 * @param \phpbb\config\config $config
 	 */
-	public function __construct(\nickvergessen\newspage\helper $helper, \phpbb\template\template $template)
+	public function __construct(\nickvergessen\newspage\helper $helper, \phpbb\template\template $template, \phpbb\config\config $config)
 	{
 		$this->helper = $helper;
 		$this->template = $template;
+		$this->config = $config;
 	}
 
 	/**
@@ -74,6 +79,7 @@ class menu_link_listener implements EventSubscriberInterface
 	{
 		$this->template->assign_vars(array(
 			'U_NEWSPAGE'	=> $this->helper->generate_route()->get_url(),
+			'NEWSPAGE_ICON' => isset($this->config['news_icon']) ? $this->config['news_icon'] : 'fa-bullhorn',
 		));
 	}
 }
