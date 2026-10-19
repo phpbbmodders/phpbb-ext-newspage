@@ -8,7 +8,7 @@
 <!-- IF .archive_block or .cat_block or .pagination or TOTAL_NEWS -->
 <br />
 <!-- EVENT nickvergessen_newspage_filters_before -->
-<div class="action-bar">
+<div class="action-bar newspage-filters">
 	<!-- INCLUDE newspage_categories_dropdown.html -->
 	<!-- INCLUDE newspage_archives_dropdown.html -->
 
@@ -23,6 +23,20 @@
 	</div>
 	<!-- ENDIF -->
 </div>
+<!-- IF NEWS_FILTER_CATEGORY or NEWS_FILTER_ARCHIVE_YEAR -->
+<p class="newspage-active-filters">
+	<span>{L_NEWS_FILTER_SHOWING}{L_COLON}</span>
+	<!-- IF NEWS_FILTER_CATEGORY -->
+	<a href="{U_REMOVE_CATEGORY_FILTER}" class="newspage-chip" title="{L_NEWS_FILTER_REMOVE}">{NEWS_FILTER_CATEGORY} <i class="icon fa-times fas fa-fw" aria-hidden="true"></i><span class="sr-only">{L_NEWS_FILTER_REMOVE}</span></a>
+	<!-- ENDIF -->
+	<!-- IF NEWS_FILTER_ARCHIVE_YEAR -->
+	<a href="{U_REMOVE_ARCHIVE_FILTER}" class="newspage-chip" title="{L_NEWS_FILTER_REMOVE}">{NEWS_FILTER_ARCHIVE_MONTH} {NEWS_FILTER_ARCHIVE_YEAR} <i class="icon fa-times fas fa-fw" aria-hidden="true"></i><span class="sr-only">{L_NEWS_FILTER_REMOVE}</span></a>
+	<!-- ENDIF -->
+	<!-- IF NEWS_FILTER_CATEGORY and NEWS_FILTER_ARCHIVE_YEAR -->
+	<a href="{U_NEWSPAGE}" class="newspage-clear">{L_NEWS_FILTER_CLEAR}</a>
+	<!-- ENDIF -->
+</p>
+<!-- ENDIF -->
 <!-- EVENT nickvergessen_newspage_filters_after -->
 <!-- ENDIF -->
 

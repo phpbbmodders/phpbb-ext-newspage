@@ -1,30 +1,3 @@
-.icon-newspage {
-	background-image: url("./images/icon_news.gif");
-}
-
-a.arrow-right-on-left {
-	background-position: 0 60%;
-}
-
-a.arrow-right-on-left, a.arrow-right-on-left:active,
-a.arrow-right-on-left:visited {
-	padding-left: 12px;
-	padding-right: 0;
-}
-
-a.arrow-right-on-left:hover {
-	text-decoration: none;
-	background-position: 3px 60%;
-}
-
-.newspage-dropdown ul li:first-child {
-	padding-left: 5px;
-}
-
-#newspage_settings .dropdown-contents ul li {
-	padding: 5px;
-}
-
 /* News items: title, byline, text, then one footer line */
 .newspage-item {
 	background-color: #ecf3f7;
@@ -130,4 +103,83 @@ a.arrow-right-on-left:hover {
 		float: none;
 		margin: 0 0 6px;
 	}
+}
+
+/* Filter bar: forum and month as select-style buttons, then the active filters */
+.newspage-filters .newspage-dropdown {
+	margin-right: 6px;
+}
+
+.newspage-filters .newspage-filter {
+	color: #47536b;
+	font-weight: normal;
+}
+
+.newspage-filters .newspage-filter-active {
+	border-color: #105289;
+	color: #105289;
+	font-weight: bold;
+}
+
+.newspage-filters .newspage-filter .icon {
+	margin-left: 2px;
+}
+
+.newspage-dropdown .dropdown-contents {
+	min-width: 220px;
+}
+
+.newspage-dropdown .dropdown-contents li {
+	align-items: baseline;
+	display: flex;
+	gap: 6px;
+	padding: 4px 8px;
+	white-space: nowrap;
+}
+
+.newspage-dropdown .newspage-option {
+	flex: 1;
+}
+
+.newspage-dropdown .newspage-remove {
+	margin-left: auto;
+}
+
+.newspage-count {
+	background-color: #e1ebf2;
+	border-radius: 8px;
+	color: #536482;
+	font-size: 0.9em;
+	padding: 0 6px;
+}
+
+.newspage-add {
+	font-weight: bold;
+}
+
+.newspage-active-filters {
+	align-items: center;
+	color: #4c5d77;
+	display: flex;
+	flex-wrap: wrap;
+	font-size: 1.1em;
+	gap: 6px;
+	margin: 0 0 10px;
+}
+
+.newspage-chip {
+	background-color: #e1ebf2;
+	border: 1px solid #b4c3d4;
+	border-radius: 12px;
+	color: #105289;
+	padding: 1px 6px 1px 10px;
+}
+
+.newspage-chip:hover {
+	background-color: #d1dfea;
+	text-decoration: none;
+}
+
+.newspage-clear {
+	margin-left: 4px;
 }

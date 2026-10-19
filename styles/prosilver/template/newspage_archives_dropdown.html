@@ -1,11 +1,8 @@
 <!-- IF .archive_block -->
-<div class="dropdown-container dropdown-button-control topic-tools newspage-dropdown">
-	<span title="{L_NEWS_FILTER_BY_ARCHIVE}" class="button dropdown-trigger dropdown-select">
-		<!-- IF NEWS_FILTER_ARCHIVE_YEAR -->
-			{NEWS_FILTER_ARCHIVE_YEAR} &raquo; {NEWS_FILTER_ARCHIVE_MONTH}
-		<!-- ELSE -->
-			{L_NEWS_FILTER_ARCHIVE}
-		<!-- ENDIF -->
+<div class="dropdown-container dropdown-button-control newspage-dropdown">
+	<span title="{L_NEWS_FILTER_BY_ARCHIVE}" class="button dropdown-trigger dropdown-select newspage-filter<!-- IF NEWS_FILTER_ARCHIVE_YEAR --> newspage-filter-active<!-- ENDIF -->">
+		<span><!-- IF NEWS_FILTER_ARCHIVE_YEAR -->{NEWS_FILTER_ARCHIVE_MONTH} {NEWS_FILTER_ARCHIVE_YEAR}<!-- ELSE -->{L_NEWS_FILTER_ARCHIVE}<!-- ENDIF --></span>
+		<i class="icon fa-caret-down fas fa-fw" aria-hidden="true"></i>
 	</span>
 	<div class="dropdown hidden">
 		<div class="pointer"><div class="pointer-inner"></div></div>
@@ -13,19 +10,19 @@
 			<li>
 				<strong>{L_NEWS_ARCHIVE}</strong>
 				<!-- IF U_REMOVE_ARCHIVE_FILTER -->
-					[ <a href="{U_REMOVE_ARCHIVE_FILTER}">{L_NEWS_FILTER_REMOVE}</a> ]
+					<a href="{U_REMOVE_ARCHIVE_FILTER}" class="newspage-remove">{L_NEWS_FILTER_REMOVE}</a>
 				<!-- ENDIF -->
 			</li>
 			<!-- BEGIN archive_block -->
 			<li><strong>{archive_block.NEWS_YEAR}</strong></li>
 			<!-- BEGIN archive_row -->
 				<li>
-					<a href="{archive_block.archive_row.U_NEWS_MONTH}" class="arrow-right arrow-right-on-left">
+					<a href="{archive_block.archive_row.U_NEWS_MONTH}" class="newspage-option">
 						<!-- IF archive_block.archive_row.S_SELECTED --><strong><!-- ENDIF -->
 						{archive_block.archive_row.NEWS_MONTH}
 						<!-- IF archive_block.archive_row.S_SELECTED --></strong><!-- ENDIF -->
 					</a>
-					[<strong>{archive_block.archive_row.NEWS_COUNT}</strong>]
+					<span class="newspage-count">{archive_block.archive_row.NEWS_COUNT}</span>
 				</li>
 			<!-- END archive_row -->
 			<!-- END archive_block -->
