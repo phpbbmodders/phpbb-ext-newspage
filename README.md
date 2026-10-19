@@ -1,45 +1,57 @@
-# NV Newspage Extension
+# NV Newspage
 
-An independent continuation of NV Newspage for [phpBB](https://www.phpbb.com/), maintained under phpbbmodders.
+[![Tests](https://github.com/phpbbmodders/phpbb-ext-newspage/actions/workflows/tests.yml/badge.svg)](https://github.com/phpbbmodders/phpbb-ext-newspage/actions/workflows/tests.yml) [![Lint](https://github.com/phpbbmodders/phpbb-ext-newspage/actions/workflows/lint.yml/badge.svg)](https://github.com/phpbbmodders/phpbb-ext-newspage/actions/workflows/lint.yml)
 
-## Compatibility
+A news page that shows the latest topics from chosen forums, shortened to a set length, with monthly archives and categories.
 
-The imported code targets phpBB 3.1. Work toward phpBB 3.3 support is planned; compatibility has not yet been implemented or verified. Do not install this development branch on a production board.
+## Features
 
-The original branches and release tags are preserved as historical upstream snapshots. They do not represent phpbbmodders releases or phpBB 3.3 support.
+- A **News** page at `/news`, linked from the board's navigation bar with an icon you choose.
+- Shows the first post of the newest topics in the forums you pick, with a set number of news per page and pages.
+- Shortens long news to a set number of characters, with a "Read full news" link. Formatting is kept and no tag is cut in half.
+- Visitors can filter the news by forum and by month, and open a single news item.
+- Optional poster information (avatar, rank, profile fields), post buttons, attachments and moved topics.
+- Shows in **Who is online** when someone is reading the news.
+- Settings under **ACP → Extensions → Newspage**.
 
+## Screenshots
 
-## Description
+<table>
+<tr>
+<td><a href="docs/images/screenshots/newspage-news.png"><img src="docs/images/screenshots/newspage-news.png" width="440" alt="News page"></a></td>
+<td><a href="docs/images/screenshots/newspage-acp-settings.png"><img src="docs/images/screenshots/newspage-acp-settings.png" width="440" alt="ACP settings"></a></td>
+</tr>
+</table>
 
-Adds an extra page to the board where a switchable number of news can be displayed.
-The news texts can be shorten to a given number of characters.
-Also the icons can be switched on/off (post icons, user icons)
+Click an image for the full size. See the [screenshot gallery](docs/images/screenshots/README.md) for the rest.
 
+## Requirements
 
-## Development Installation
+- phpBB 3.3.19 or later, including phpBB 4.0 (tested on its 4.0.0-a3 development version)
+- PHP 7.4 or later (phpBB 4.0 itself needs PHP 8.2 or later), with the DOM extension
 
-Clone into phpBB/ext/phpbbmodders/newspage:
+## Installation
 
-    git clone https://github.com/phpbbmodders/phpbb-ext-newspage.git phpBB/ext/phpbbmodders/newspage
+1. Copy the extension to `/ext/phpbbmodders/newspage`
+2. In the Administration Control Panel, go to **Customise → Manage extensions**
+3. Enable the **NV Newspage** extension
+4. Choose the news forums under **ACP → Extensions → Newspage → Settings**
 
-Set up the dependencies:
+### Upgrading from `nickvergessen/newspage`
 
-    php composer.phar install --dev
+This extension used to be installed as `nickvergessen/newspage`. Your settings carry over:
 
-Go to "ACP" > "Customise" > "Extensions" and enable the "phpBB 3.1 NV Newspage Extension" extension.
+1. Disable the old **NV Newspage** extension in the ACP. Do **not** delete its data.
+2. Upload this version to `/ext/phpbbmodders/newspage` and enable it. The old install's migration history is moved to the new name automatically.
+3. Delete the `/ext/nickvergessen/newspage` folder and purge the board cache.
 
-Configure Newspage under "ACP" > "Extensions" > "Newspage" > "Settings". Existing news settings are preserved when upgrading.
-The News navigation link defaults to the Font Awesome megaphone (`fa-bullhorn`). Its icon class can be changed on the same settings page.
+If you disable the old extension from the command line (`bin/phpbbcli.php`) instead of the ACP, run `bin/phpbbcli.php cache:purge` before enabling the new one; the command-line disable doesn't clear the cache.
 
+The settings moved from the news page itself to the ACP. The News link's icon is a Font Awesome class: phpBB 3.3 uses Font Awesome 4.7 and phpBB 4.0 uses Font Awesome 6, so pick a name both have (the default, `fa-bullhorn`, works on both).
 
-## List of events
+## Events
 
-See the [documentation](docs/events.md) for a list of available php and template events.
-
-
-## Testing
-
-GitHub Actions checks PHP syntax. This does not establish phpBB runtime compatibility. The imported PHPUnit suite and Travis configuration target phpBB 3.1 and need updating before they can validate the 3.3 port.
+The PHP and template events other extensions can use are listed in [docs/events.md](docs/events.md).
 
 ## TODO
 
@@ -50,15 +62,17 @@ Ideas not yet built, practical and speculative alike: [`docs/TODO.md`](docs/TODO
 Contributions are welcome!
 
 - **Bug reports**: [Open an issue](https://github.com/phpbbmodders/phpbb-ext-newspage/issues).
-- **Everything else** (questions, feature requests, ideas, general discussion): [Use Discussions](https://github.com/phpbbmodders/phpbb-ext-newspage/discussions).
+- **Everything else** (questions, feature requests, ideas, general discussion): [Use Discussions](https://github.com/orgs/phpbbmodders/discussions), or the [community forum](https://www.phpbbmodders.com/community/).
 - Pull requests are welcome for bug fixes or discussed features.
 
 ## Acknowledgments
 
-- Based on [nickv-phpbb/phpbb-ext-newspage](https://github.com/nickv-phpbb/phpbb-ext-newspage), originally developed by Joas Schilling (nickvergessen). Original history, authorship, and licensing are preserved.
-- Code review and documentation assisted by [Codex](https://www.anthropic.com/Codex).
-
+- Based on [nickv-phpbb/phpbb-ext-newspage](https://github.com/nickv-phpbb/phpbb-ext-newspage), originally developed by Joas Schilling ([nickvergessen](https://github.com/nickvergessen)). Original history, authorship and licensing are preserved.
+- Code review, bug fixes, and documentation assisted by [Claude](https://www.anthropic.com/claude).
+- Code review and documentation assisted by [Codex](https://openai.com/codex/).
 
 ## License
 
-[GPLv2](license.txt)
+This extension is licensed under the **GNU General Public License v2.0**.
+
+See [license.txt](license.txt) for more information.
