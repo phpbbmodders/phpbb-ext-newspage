@@ -1,24 +1,21 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage\controller;
+namespace phpbbmodders\newspage\controller;
 
 use phpbb\exception\http_exception;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class settings
- *
- * @package nickvergessen\newspage\controller
+ * Saves the news page settings from the ACP settings form.
  */
 class settings
 {
@@ -31,49 +28,31 @@ class settings
 	/* @var \phpbb\request\request_interface */
 	protected $request;
 
-	/* @var \phpbb\controller\helper */
-	protected $helper;
-
-	/* @var \phpbb\user */
-	protected $user;
-
 	/**
 	 * Constructor
 	 *
 	 * @param \phpbb\auth\auth $auth
 	 * @param \phpbb\config\config $config
 	 * @param \phpbb\request\request_interface $request
-	 * @param \phpbb\controller\helper $helper
-	 * @param \phpbb\user $user
 	 */
-	public function __construct(\phpbb\auth\auth $auth, \phpbb\config\config $config, \phpbb\request\request_interface $request, \phpbb\controller\helper $helper, \phpbb\user $user)
+	public function __construct(\phpbb\auth\auth $auth, \phpbb\config\config $config, \phpbb\request\request_interface $request)
 	{
 		$this->auth = $auth;
 		$this->config = $config;
 		$this->request = $request;
-		$this->helper = $helper;
-		$this->user = $user;
 	}
 
 	/**
-	 * Newspage controller to display multiple news
-	 * @return Response A Symfony Response object
-	 * @throws http_exception
+	 * Save the submitted settings. The caller checks the form token.
+	 *
+	 * @return void
+	 * @throws http_exception When the user may not change board settings
 	 */
-	public function manage()
+	public function save_settings()
 	{
-		$this->meta_refresh();
-
-		// Redirect non admins back to the newspage
 		if (!$this->auth->acl_get('a_board'))
 		{
 			throw new http_exception(403, 'NO_AUTH_OPERATION');
-		}
-
-		// Is someone trying to fool us?
-		if (!check_form_key('newspage') || !$this->request->is_set_post('submit'))
-		{
-			throw new http_exception(400, 'FORM_INVALID');
 		}
 
 		if ($this->request->variable('news_char_limit', 0) !== 0)
@@ -95,18 +74,5 @@ class settings
 		$this->config->set('news_attach_show',	$this->request->variable('news_attach_show', false));
 		$this->config->set('news_cat_show',		$this->request->variable('news_cat_show', false));
 		$this->config->set('news_archive_show',	$this->request->variable('news_archive_show', false));
-
-		$this->user->add_lang_ext('nickvergessen/newspage', 'newspage');
-		return $this->helper->message('NEWS_SAVED');
-	}
-
-	/**
-	 * Only put into a method for better mockability
-	 *
-	 * @return null
-	 */
-	public function meta_refresh()
-	{
-		meta_refresh(3, $this->helper->route('nickvergessen_newspage_controller'));
 	}
 }

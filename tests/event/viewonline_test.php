@@ -1,31 +1,30 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage\tests\event;
+namespace phpbbmodders\newspage\tests\event;
 
-use nickvergessen\newspage\event\viewonline_listener;
-use nickvergessen\newspage\helper;
+use phpbbmodders\newspage\event\viewonline_listener;
+use phpbbmodders\newspage\helper;
 use phpbb\config\config;
 use phpbb\event\data;
 use phpbb\user;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * Class viewonline_test
- * Testing \nickvergessen\newspage\event\viewonline_listener
+ * Testing \phpbbmodders\newspage\event\viewonline_listener
  *
- * @package nickvergessen\newspage\tests\event
+ * @package phpbbmodders\newspage\tests\event
  */
-class viewonline_test extends \phpbb_test_case
+class viewonline_test extends \PHPUnit\Framework\TestCase
 {
 	/** @var user */
 	protected $user;
@@ -122,7 +121,7 @@ class viewonline_test extends \phpbb_test_case
 				array(),
 				'$location_url',
 				'$location',
-				'nickvergessen_newspage_controller#a:0:{}',
+				'phpbbmodders_newspage_controller#a:0:{}',
 				'VIEWONLINE_NEWS',
 			),
 			array(
@@ -139,7 +138,7 @@ class viewonline_test extends \phpbb_test_case
 				),
 				'$location_url',
 				'$location',
-				'nickvergessen_newspage_category_controller#' . serialize(array('forum_id' => 30)),
+				'phpbbmodders_newspage_category_controller#' . serialize(array('forum_id' => 30)),
 				'VIEWONLINE_NEWS_CATEGORY Forum30',
 			),
 			array(
@@ -152,7 +151,7 @@ class viewonline_test extends \phpbb_test_case
 				array(),
 				'$location_url',
 				'$location',
-				'nickvergessen_newspage_archive_controller#' . serialize(array('year' => 2014, 'month' => '04')),
+				'phpbbmodders_newspage_archive_controller#' . serialize(array('year' => 2014, 'month' => '04')),
 				'VIEWONLINE_NEWS_ARCHIVE April 2014',
 			),
 			array(
@@ -169,8 +168,53 @@ class viewonline_test extends \phpbb_test_case
 				),
 				'$location_url',
 				'$location',
-				'nickvergessen_newspage_category_archive_controller#' . serialize(array('forum_id' => 30, 'year' => 2014, 'month' => '04')),
+				'phpbbmodders_newspage_category_archive_controller#' . serialize(array('forum_id' => 30, 'year' => 2014, 'month' => '04')),
 				'VIEWONLINE_NEWS_CATEGORY_ARCHIVE Forum30 April 2014',
+			),
+			// phpBB 4.0 records news pages under index.php
+			array(
+				array(
+					1 => 'news',
+				),
+				array(
+					'session_page' => 'index.' . $phpEx . '/news'
+				),
+				array(),
+				'$location_url',
+				'$location',
+				'phpbbmodders_newspage_controller#a:0:{}',
+				'VIEWONLINE_NEWS',
+			),
+			array(
+				array(
+					1 => 'news/category/30/archive/2014/04',
+				),
+				array(
+					'session_page' => 'index.' . $phpEx . '/news/category/30/archive/2014/04'
+				),
+				array(
+					30 => array(
+						'forum_name'	=> 'Forum30',
+					),
+				),
+				'$location_url',
+				'$location',
+				'phpbbmodders_newspage_category_archive_controller#' . serialize(array('forum_id' => 30, 'year' => 2014, 'month' => '04')),
+				'VIEWONLINE_NEWS_CATEGORY_ARCHIVE Forum30 April 2014',
+			),
+			// Other pages are left alone
+			array(
+				array(
+					1 => 'members/online',
+				),
+				array(
+					'session_page' => 'index.' . $phpEx . '/members/online'
+				),
+				array(),
+				'$location_url',
+				'$location',
+				'$location_url',
+				'$location',
 			),
 		);
 	}
@@ -190,12 +234,9 @@ class viewonline_test extends \phpbb_test_case
 	{
 		$this->setup_listener();
 
-		$dispatcher = new EventDispatcher();
-		$dispatcher->addListener('core.viewonline_overwrite_location', array($this->listener, 'add_newspage_viewonline'));
-
 		$event_data = array('on_page', 'row', 'location_url', 'location', 'forum_data');
 		$event = new data(compact($event_data));
-		$dispatcher->dispatch('core.viewonline_overwrite_location', $event);
+		$this->listener->add_newspage_viewonline($event);
 
 		$event_data_after = $event->get_data_filtered($event_data);
 		foreach ($event_data as $expected)

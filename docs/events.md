@@ -1,5 +1,8 @@
 # Available php Events
 
+The PHP and template events keep the names they had in `nickvergessen/newspage`,
+so listeners and style templates written for it keep working.
+
 ### nickvergessen.newspage.newspage
 * Locations:
     + controller/main.php

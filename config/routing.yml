@@ -1,7 +1,7 @@
-nickvergessen_newspage_controller:
+phpbbmodders_newspage_controller:
     path: /news
-    defaults: { _controller: nickvergessen.newspage.controller:newspage, forum_id: 0, year: 0, month: 0, page: 1 }
+    defaults: { _controller: phpbbmodders.newspage.controller:newspage, forum_id: 0, year: 0, month: 0, page: 1 }
 
-nickvergessen_newspage_subpages:
+phpbbmodders_newspage_subpages:
     resource: "newspage_routing.yml"
     prefix: /news

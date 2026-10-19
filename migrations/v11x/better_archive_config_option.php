@@ -1,21 +1,21 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage\migrations\v11x;
+namespace phpbbmodders\newspage\migrations\v11x;
 
 use phpbb\db\migration\migration;
 
 /**
- * @package nickvergessen\newspage\migrations\v11x
+ * @package phpbbmodders\newspage\migrations\v11x
  */
 class better_archive_config_option extends migration
 {
@@ -30,9 +30,9 @@ class better_archive_config_option extends migration
 	/**
 	 * {@inheritdoc}
 	 */
-	static public function depends_on()
+	public static function depends_on()
 	{
-		return array('\nickvergessen\newspage\migrations\v11x\release_1_1_0');
+		return array('\phpbbmodders\newspage\migrations\v11x\release_1_1_0');
 	}
 
 	/**

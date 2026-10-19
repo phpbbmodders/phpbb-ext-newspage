@@ -1,23 +1,21 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage;
-
-use Nickvergessen\TrimMessage\TrimMessage;
+namespace phpbbmodders\newspage;
 
 /**
  * Class newspage
  *
- * @package nickvergessen\newspage
+ * @package phpbbmodders\newspage
  */
 class newspage
 {
@@ -39,10 +37,12 @@ class newspage
 	protected $content_visibility;
 	/** @var \phpbb\controller\helper */
 	protected $helper;
-	/** @var \nickvergessen\newspage\helper */
+	/** @var \phpbbmodders\newspage\helper */
 	protected $news_helper;
 	/** @var \phpbb\pagination */
 	protected $pagination;
+	/** @var \phpbb\avatar\helper|null phpBB 4.0's avatar helper; null on phpBB 3.3 */
+	protected $avatar_helper;
 
 	/** @var string */
 	protected $root_path;
@@ -54,13 +54,13 @@ class newspage
 	/** @var string */
 	protected $page_title;
 	/** @var int */
-	protected $start;
+	protected $start = 0;
 	/** @var int */
-	protected $news;
+	protected $news = 0;
 	/** @var array */
-	protected $archive;
+	protected $archive = array('y' => 0, 'm' => 0);
 	/** @var int */
-	protected $category;
+	protected $category = 0;
 
 	const ARCHIVE_SHOW = 1;
 	const ARCHIVE_PER_YEAR = 2;
@@ -86,12 +86,12 @@ class newspage
 	* @param \phpbb\user		$user		User object
 	* @param \phpbb\content_visibility		$content_visibility	Content visibility object
 	* @param \phpbb\controller\helper		$helper				Controller helper object
-	* @param \nickvergessen\newspage\helper $news_helper				Controller helper object
+	* @param \phpbbmodders\newspage\helper $news_helper				Controller helper object
 	* @param \phpbb\pagination	$pagination	Pagination object
 	* @param string			$root_path	phpBB root path
 	* @param string			$php_ext	phpEx
 	*/
-	public function __construct(\phpbb\auth\auth $auth, \phpbb\cache\service $cache, \phpbb\config\config $config, \phpbb\db\driver\driver_interface $db, \phpbb\request\request_interface $request, \phpbb\template\template $template, \phpbb\user $user, \phpbb\content_visibility $content_visibility, \phpbb\controller\helper $helper, \nickvergessen\newspage\helper $news_helper, \phpbb\pagination $pagination, $root_path, $php_ext)
+	public function __construct(\phpbb\auth\auth $auth, \phpbb\cache\service $cache, \phpbb\config\config $config, \phpbb\db\driver\driver_interface $db, \phpbb\request\request_interface $request, \phpbb\template\template $template, \phpbb\user $user, \phpbb\content_visibility $content_visibility, \phpbb\controller\helper $helper, \phpbbmodders\newspage\helper $news_helper, \phpbb\pagination $pagination, $root_path, $php_ext)
 	{
 		$this->auth = $auth;
 		$this->cache = $cache;
@@ -107,15 +107,55 @@ class newspage
 		$this->root_path = $root_path;
 		$this->php_ext = $php_ext;
 
-		if (!class_exists('bbcode'))
-		{
-			include($this->root_path . 'includes/bbcode.' . $this->php_ext);
-		}
 		if (!function_exists('phpbb_get_user_rank'))
 		{
 			include($this->root_path . 'includes/functions_display.' . $this->php_ext);
 		}
 		$this->page_title = $this->user->lang['NEWS'];
+	}
+
+	/**
+	 * Set phpBB 4.0's avatar helper. phpBB 3.3 has none and passes null.
+	 *
+	 * @param \phpbb\avatar\helper|null $avatar_helper
+	 * @return void
+	 */
+	public function set_avatar_helper($avatar_helper = null)
+	{
+		$this->avatar_helper = $avatar_helper;
+	}
+
+	/**
+	 * The poster's avatar as an image tag, as phpBB 3.3 makes it.
+	 *
+	 * phpBB 4.0 has no phpbb_get_user_avatar(); its avatar helper returns the
+	 * avatar's data instead, which is turned into the same markup here so the
+	 * news templates work on both versions.
+	 *
+	 * @param array $row User row with the user_avatar* columns
+	 * @return string Image tag, or an empty string for no avatar
+	 */
+	protected function get_poster_avatar(array $row)
+	{
+		if (function_exists('phpbb_get_user_avatar'))
+		{
+			return phpbb_get_user_avatar($row);
+		}
+
+		if ($this->avatar_helper === null)
+		{
+			return '';
+		}
+
+		$avatar = $this->avatar_helper->get_user_avatar($row);
+		if (empty($avatar['src']))
+		{
+			return '';
+		}
+
+		return '<img class="avatar" src="' . utf8_htmlspecialchars($avatar['src']) . '"'
+			. ' width="' . (int) $avatar['width'] . '" height="' . (int) $avatar['height'] . '"'
+			. ' alt="' . utf8_htmlspecialchars($avatar['title']) . '" />';
 	}
 
 	/**
@@ -247,11 +287,6 @@ class newspage
 
 	public function base()
 	{
-		if ($this->auth->acl_get('a_board'))
-		{
-			$this->display_newspage_settings();
-		}
-
 		$this->get_news_ids();
 
 		if (empty($this->topic_ids))
@@ -309,15 +344,14 @@ class newspage
 			{
 				$this->page_title = censor_text($row['post_subject']);
 			}
-			else if (((int) $this->config['news_char_limit']) !== 0 && class_exists('\Nickvergessen\TrimMessage\TrimMessage'))
-			{
-				$trim = new TrimMessage($row['post_text'], $row['bbcode_uid'], $this->config['news_char_limit']);
-				$row['post_text'] = $trim->message();
-				unset($trim);
-			}
 
-			$parse_flags = ($row['bbcode_bitfield'] ? OPTION_FLAG_BBCODE : 0) | OPTION_FLAG_SMILIES;
+			$parse_flags = ($row['enable_bbcode'] ? OPTION_FLAG_BBCODE : 0) | ($row['enable_smilies'] ? OPTION_FLAG_SMILIES : 0) | ($row['enable_magic_url'] ? OPTION_FLAG_LINKS : 0);
 			$message = generate_text_for_display($row['post_text'], $row['bbcode_uid'], $row['bbcode_bitfield'], $parse_flags, true);
+			if (!$this->news && (int) $this->config['news_char_limit'] > 0)
+			{
+				$trimmer = new message_trimmer();
+				$message = $trimmer->trim($message, (int) $this->config['news_char_limit']);
+			}
 
 			if (!$this->auth->acl_get('f_download', $forum_id))
 			{
@@ -349,8 +383,6 @@ class newspage
 					$this->db->sql_freeresult($result2);
 				}
 
-				$l_edit_time_total = ($row['post_edit_count'] == 1) ? $this->user->lang['EDITED_TIME_TOTAL'] : $this->user->lang['EDITED_TIMES_TOTAL'];
-
 				if (!$row['post_edit_user'] || $row['post_edit_user'] == $poster_id)
 				{
 					$display_username = get_username_string('full', $poster_id, $row['username'], $row['user_colour'], $row['post_username']);
@@ -360,14 +392,7 @@ class newspage
 					$display_username = get_username_string('full', $row['post_edit_user'], $post_edit_list[$row['post_edit_user']]['username'], $post_edit_list[$row['post_edit_user']]['user_colour']);
 				}
 
-				if ($row['post_edit_reason'])
-				{
-					$l_edited_by = sprintf($l_edit_time_total, $display_username, $this->user->format_date($row['post_edit_time'], false, true), $row['post_edit_count']);
-				}
-				else
-				{
-					$l_edited_by = sprintf($l_edit_time_total, $display_username, $this->user->format_date($row['post_edit_time'], false, true), $row['post_edit_count']);
-				}
+				$l_edited_by = $this->user->lang('EDITED_TIMES_TOTAL', (int) $row['post_edit_count'], $display_username, $this->user->format_date($row['post_edit_time'], false, true));
 			}
 			else
 			{
@@ -382,7 +407,8 @@ class newspage
 			$row['rank_image'] = $rank_data['img'];
 			$row['rank_image_src'] = $rank_data['img_src'];
 
-			$row['user_jabber'] = ($row['user_jabber'] && $this->auth->acl_get('u_sendim')) ? append_sid("{$this->root_path}memberlist.{$this->php_ext}", "mode=contact&amp;action=jabber&amp;u=$poster_id") : '';
+			// phpBB 4.0 has no Jabber field, so the column may be missing
+			$row['user_jabber'] = (!empty($row['user_jabber']) && $this->auth->acl_get('u_sendim')) ? append_sid("{$this->root_path}memberlist.{$this->php_ext}", "mode=contact&amp;action=jabber&amp;u=$poster_id") : '';
 
 			// Can this user receive a Private Message?
 			$can_receive_pm = (
@@ -428,14 +454,16 @@ class newspage
 				'U_REPORT'				=> ($this->auth->acl_get('f_report', $forum_id)) ? append_sid("{$this->root_path}report.{$this->php_ext}", 'f=' . $forum_id . '&amp;p=' . $row['post_id']) : '',
 				'U_NOTES'				=> ($this->auth->acl_getf_global('m_')) ? append_sid("{$this->root_path}mcp.{$this->php_ext}", 'i=notes&amp;mode=user_notes&amp;u=' . $poster_id, true, $this->user->session_id) : '',
 				'U_WARN'				=> ($this->auth->acl_get('m_warn') && $poster_id != $this->user->data['user_id'] && $poster_id != ANONYMOUS) ? append_sid("{$this->root_path}mcp.{$this->php_ext}", 'i=warn&amp;mode=warn_post&amp;f=' . $forum_id . '&amp;p=' . $post_id, true, $this->user->session_id) : '',
-				'U_NEWS'				=> $this->helper->route('nickvergessen_newspage_singlenews_controller', array('topic_id' => $topic_id)),
+				'U_NEWS'				=> $this->helper->route('phpbbmodders_newspage_singlenews_controller', array('topic_id' => $topic_id)),
 
 				'POST_ICON_IMG'			=> (!empty($row['icon_id'])) ? $icons[$row['icon_id']]['img'] : '',
 				'POST_ICON_IMG_WIDTH'	=> (!empty($row['icon_id'])) ? $icons[$row['icon_id']]['width'] : '',
 				'POST_ICON_IMG_HEIGHT'	=> (!empty($row['icon_id'])) ? $icons[$row['icon_id']]['height'] : '',
 				'U_MINI_POST'			=> append_sid("{$this->root_path}viewtopic.{$this->php_ext}", 'p=' . $row['post_id']) . (($row['topic_type'] == POST_GLOBAL) ? '&amp;f=' . $forum_id : '') . '#p' . $row['post_id'],
-				'POST_SUBJECT'			=> censor_text($row['post_subject']),
+				'POST_SUBJECT'			=> htmlspecialchars(censor_text($row['post_subject']), ENT_QUOTES, 'UTF-8', false),
 				'MINI_POST_IMG'			=> ($post_unread) ? $this->user->img('icon_post_target_unread', 'NEW_POST') : $this->user->img('icon_post_target', 'POST'),
+				'MINI_POST'				=> ($post_unread) ? $this->user->lang['UNREAD_POST'] : $this->user->lang['POST'],
+				'S_UNREAD_POST'			=> $post_unread,
 				'POST_AUTHOR_FULL'		=> get_username_string('full', $poster_id, $row['username'], $row['user_colour'], $row['post_username']),
 				'POST_DATE'				=> $this->user->format_date($row['post_time']),
 
@@ -447,24 +475,25 @@ class newspage
 				'MESSAGE'				=> $row['post_text'],
 
 				'S_HAS_POLL'			=> (!empty($row['poll_start'])) ? true : false,
-				'POLL_QUESTION'			=> $row['poll_title'],
+				'POLL_QUESTION'			=> htmlspecialchars(censor_text($row['poll_title']), ENT_QUOTES, 'UTF-8', false),
 				'S_HAS_ATTACHMENTS'		=> (!empty($attachments[$row['post_id']]) && $this->config['news_attach_show']) ? true : false,
 				'S_DISPLAY_NOTICE'		=> $display_notice && $row['post_attachment'],
 				'EDITED_MESSAGE'		=> $l_edited_by,
-				'EDIT_REASON'			=> $row['post_edit_reason'],
+				'EDIT_REASON'			=> htmlspecialchars($row['post_edit_reason'], ENT_QUOTES, 'UTF-8', false),
 				'SIGNATURE'				=> ($row['enable_sig']) ? $row['user_sig'] : '',
 				'NEWS_COMMENTS'			=> $this->content_visibility->get_count('topic_posts', $row, $forum_id) - 1,
 
-				'POSTER_AVATAR'			=> ($this->user->optionget('viewavatars')) ? phpbb_get_user_avatar($row) : '',
+				'POSTER_AVATAR'			=> ($this->user->optionget('viewavatars')) ? $this->get_poster_avatar($row) : '',
 				'U_POST_AUTHOR'			=> get_username_string('profile', $poster_id, $row['username'], $row['user_colour'], $row['post_username']),
 				'RANK_TITLE'			=> $row['rank_title'],
 				'RANK_IMG'				=> $row['rank_image'],
 				'RANK_IMG_SRC'			=> $row['rank_image_src'],
 				'POSTER_POSTS'			=> $row['user_posts'],
 				'POSTER_JOINED'			=> $this->user->format_date($row['user_regdate']),
+				'U_SEARCH'				=> $this->auth->acl_get('u_search') ? append_sid("{$this->root_path}search.{$this->php_ext}", 'author_id=' . $poster_id . '&amp;sr=posts') : '',
 
-				'U_PM'					=> ($poster_id != ANONYMOUS && $this->config['allow_privmsg'] && $this->auth->acl_get('u_sendpm') && ($row['user_allow_pm'] || $this->auth->acl_gets('a_', 'm_') || $this->auth->acl_getf_global('m_'))) ? append_sid("{$this->root_path}ucp.{$this->php_ext}", 'i=pm&amp;mode=compose&amp;action=quotepost&amp;p=' . $row['post_id']) : '',
-				'U_EMAIL'				=> $row['user_email'],
+				'U_PM'					=> $u_pm,
+				'U_EMAIL'				=> $u_email,
 				'U_JABBER'				=> $row['user_jabber'],
 			));
 
@@ -479,12 +508,16 @@ class newspage
 					'NAME'		=> $this->user->lang['SEND_EMAIL'],
 					'U_CONTACT'	=> $u_email,
 				),
-				array(
+			);
+
+			if ($row['user_jabber'])
+			{
+				$contact_fields[] = array(
 					'ID'		=> 'jabber',
 					'NAME'		=> $this->user->lang['JABBER'],
-					'U_CONTACT'	=> ($row['user_jabber'] && $this->auth->acl_get('u_sendim')) ? append_sid("{$this->root_path}memberlist.{$this->php_ext}", "mode=contact&amp;action=jabber&amp;u=$poster_id") : '',
-				),
-			);
+					'U_CONTACT'	=> $row['user_jabber'],
+				);
+			}
 
 			foreach ($contact_fields as $field)
 			{
@@ -526,8 +559,8 @@ class newspage
 
 		// Specify some images
 		$this->template->assign_vars(array(
-			'NEWS_USER_INFO'			=> true, // $this->config['news_user_info'],
-			'NEWS_POST_BUTTONS'			=> true, // $this->config['news_post_buttons'],
+			'NEWS_USER_INFO'			=> (bool) $this->config['news_user_info'],
+			'NEWS_POST_BUTTONS'			=> (bool) $this->config['news_post_buttons'],
 			'S_NEWS_ARCHIVE_PER_YEAR'	=> $this->config['news_archive_show'] == self::ARCHIVE_PER_YEAR,
 
 			'NEWS_ONLY'					=> $this->news,
@@ -608,7 +641,9 @@ class newspage
 		else if ($this->is_archive())
 		{
 			$archive_start = $this->user->get_timestamp_from_format('Y-n-d H:i:s', $this->archive['y'] . '-' . $this->archive['m'] . '-01 0:00:00');
-			$archive_end = $this->user->get_timestamp_from_format('Y-n-d H:i:s', $this->archive['y'] . '-' . ($this->archive['m'] + 1) . '-01 0:00:00') - 1;
+			$next_month = $this->archive['m'] == 12 ? 1 : $this->archive['m'] + 1;
+			$next_year = $this->archive['y'] + ($this->archive['m'] == 12 ? 1 : 0);
+			$archive_end = $this->user->get_timestamp_from_format('Y-n-d H:i:s', $next_year . '-' . $next_month . '-01 0:00:00') - 1;
 			$archive_name = $this->user->lang('NEWS_ARCHIVE_OF', $this->user->format_date($archive_start, 'F Y'));
 
 			$this->page_title = $archive_name;
@@ -679,7 +714,7 @@ class newspage
 			ORDER BY left_id ASC';
 		$result = $this->db->sql_query($sql);
 
-		/** @var \nickvergessen\newspage\route $route */
+		/** @var \phpbbmodders\newspage\route $route */
 		$route = $this->news_helper->generate_route($this->category, $this->archive);
 		while ($row = $this->db->sql_fetchrow($result))
 		{
@@ -775,7 +810,7 @@ class newspage
 					$this->num_pagination_items += $archive['count'];
 				}
 
-				/** @var \nickvergessen\newspage\route $route */
+				/** @var \phpbbmodders\newspage\route $route */
 				$route = $this->news_helper->generate_route($this->category, $this->archive);
 				$this->template->assign_block_vars('archive_block.archive_row', array(
 					'U_NEWS_MONTH'		=> $route->get_url(($active_archive) ? '' : empty($this->config['news_cat_show']), $archive['url']),
@@ -835,7 +870,7 @@ class newspage
 			$pagination_news = $this->num_pagination_items;
 		}
 
-		/** @var \nickvergessen\newspage\route $route */
+		/** @var \phpbbmodders\newspage\route $route */
 		$route = $this->news_helper->generate_route($this->category, $this->archive);
 		$this->pagination->generate_template_pagination(
 			array(
@@ -852,28 +887,4 @@ class newspage
 		));
 	}
 
-	protected function display_newspage_settings()
-	{
-		if (!function_exists('make_forum_select'))
-		{
-			include($this->root_path . 'includes/functions_admin.' . $this->php_ext);
-		}
-
-		add_form_key('newspage');
-		$this->template->assign_vars(array(
-			'U_SETTING_ACTION'			=> $this->helper->route('nickvergessen_newspage_settings'),
-			'SETTING_NEWS_CHAR_LIMIT'		=> (int) $this->config['news_char_limit'],
-			'SETTING_NEWS_NUMBER'			=> (int) $this->config['news_number'],
-			'SETTING_NEWS_PAGES'			=> (int) $this->config['news_pages'],
-			'SETTING_NEWS_SHADOW_SHOW'		=> (bool) $this->config['news_shadow'],
-			'SETTING_NEWS_ATTACH_SHOW'		=> (bool) $this->config['news_attach_show'],
-			'SETTING_NEWS_CAT_SHOW'			=> (bool) $this->config['news_cat_show'],
-			'SETTING_NEWS_ARCHIVE_SHOW'		=> (bool) $this->config['news_archive_show'],
-			'SETTING_NEWS_FORUMS'			=> make_forum_select(explode(',', $this->config['news_forums'])),
-
-			'SETTING_BUTTON_RESPONSIVE_FIXED'	=> false,
-			'SETTING_NEWS_USER_INFO'		=> (bool) $this->config['news_user_info'],
-			'SETTING_NEWS_POST_BUTTONS'		=> (bool) $this->config['news_post_buttons'],
-		));
-	}
 }

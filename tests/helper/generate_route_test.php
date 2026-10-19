@@ -1,27 +1,27 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage\tests\helper;
+namespace phpbbmodders\newspage\tests\helper;
 
 use phpbb\config\config;
-use nickvergessen\newspage\helper;
+use phpbbmodders\newspage\helper;
 
 /**
  * Class generate_route_test
- * Testing \nickvergessen\newspage\helper
+ * Testing \phpbbmodders\newspage\helper
  *
- * @package nickvergessen\newspage\tests\helper
+ * @package phpbbmodders\newspage\tests\helper
  */
-class generate_route_test extends \phpbb_test_case
+class generate_route_test extends \PHPUnit\Framework\TestCase
 {
 	/**
 	 * @return array

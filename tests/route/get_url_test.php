@@ -1,27 +1,27 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage\tests\route;
+namespace phpbbmodders\newspage\tests\route;
 
-use nickvergessen\newspage\route;
+use phpbbmodders\newspage\route;
 use phpbb\config\config;
 
 /**
  * Class get_url_test
- * Testing \nickvergessen\newspage\route::get_url()
+ * Testing \phpbbmodders\newspage\route::get_url()
  *
- * @package nickvergessen\newspage\tests\route
+ * @package phpbbmodders\newspage\tests\route
  */
-class get_url_test extends \phpbb_test_case
+class get_url_test extends \PHPUnit\Framework\TestCase
 {
 	/**
 	 * @return array
@@ -29,14 +29,14 @@ class get_url_test extends \phpbb_test_case
 	public function get_url_page_data()
 	{
 		return array(
-			array(false, 2, 'nickvergessen_newspage_category_archive_page_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04', 'page' => 2))),
-			array(false, 1, 'nickvergessen_newspage_category_archive_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04'))),
-			array(false, false, 'nickvergessen_newspage_category_archive_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04'))),
-			array(false, true, 'nickvergessen_newspage_category_archive_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04'))),
-			array(5, 2, 'nickvergessen_newspage_category_archive_page_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04', 'page' => 2))),
-			array(5, 1, 'nickvergessen_newspage_category_archive_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04'))),
-			array(5, false, 'nickvergessen_newspage_category_archive_page_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04', 'page' => 5))),
-			array(5, true, 'nickvergessen_newspage_category_archive_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04'))),
+			array(false, 2, 'phpbbmodders_newspage_category_archive_page_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04', 'page' => 2))),
+			array(false, 1, 'phpbbmodders_newspage_category_archive_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04'))),
+			array(false, false, 'phpbbmodders_newspage_category_archive_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04'))),
+			array(false, true, 'phpbbmodders_newspage_category_archive_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04'))),
+			array(5, 2, 'phpbbmodders_newspage_category_archive_page_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04', 'page' => 2))),
+			array(5, 1, 'phpbbmodders_newspage_category_archive_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04'))),
+			array(5, false, 'phpbbmodders_newspage_category_archive_page_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04', 'page' => 5))),
+			array(5, true, 'phpbbmodders_newspage_category_archive_controller#' . serialize(array('forum_id' => 3, 'year' => 2014, 'month' => '04'))),
 		);
 	}
 
@@ -61,18 +61,18 @@ class get_url_test extends \phpbb_test_case
 	public function get_url_category_data()
 	{
 		return array(
-			array(true, false, 3, 'nickvergessen_newspage_category_page_controller#' . serialize(array('forum_id' => 3, 'page' => 2))),
-			array(false, false, 3, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(true, false, false, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(false, false, false, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(true, false, true, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(false, false, true, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(true, 30, 3, 'nickvergessen_newspage_category_page_controller#' . serialize(array('forum_id' => 3, 'page' => 2))),
-			array(false, 30, 3, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(true, 30, false, 'nickvergessen_newspage_category_page_controller#' . serialize(array('forum_id' => 30, 'page' => 2))),
-			array(false, 30, false, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(true, 30, true, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(false, 30, true, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(true, false, 3, 'phpbbmodders_newspage_category_page_controller#' . serialize(array('forum_id' => 3, 'page' => 2))),
+			array(false, false, 3, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(true, false, false, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(false, false, false, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(true, false, true, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(false, false, true, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(true, 30, 3, 'phpbbmodders_newspage_category_page_controller#' . serialize(array('forum_id' => 3, 'page' => 2))),
+			array(false, 30, 3, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(true, 30, false, 'phpbbmodders_newspage_category_page_controller#' . serialize(array('forum_id' => 30, 'page' => 2))),
+			array(false, 30, false, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(true, 30, true, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(false, 30, true, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
 		);
 	}
 
@@ -98,18 +98,18 @@ class get_url_test extends \phpbb_test_case
 	public function get_url_archive_data()
 	{
 		return array(
-			array(true, false, '2014/04', 'nickvergessen_newspage_archive_page_controller#' . serialize(array('year' => 2014, 'month' => '04', 'page' => 2))),
-			array(false, false, '2014/04', 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(true, false, false, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(false, false, false, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(true, false, true, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(false, false, true, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(true, '2012/03', '2014/04', 'nickvergessen_newspage_archive_page_controller#' . serialize(array('year' => 2014, 'month' => '04', 'page' => 2))),
-			array(false, '2012/03', '2014/04', 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(true, '2012/03', false, 'nickvergessen_newspage_archive_page_controller#' . serialize(array('year' => 2012, 'month' => '03', 'page' => 2))),
-			array(false, '2012/03', false, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(true, '2012/03', true, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
-			array(false, '2012/03', true, 'nickvergessen_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(true, false, '2014/04', 'phpbbmodders_newspage_archive_page_controller#' . serialize(array('year' => 2014, 'month' => '04', 'page' => 2))),
+			array(false, false, '2014/04', 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(true, false, false, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(false, false, false, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(true, false, true, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(false, false, true, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(true, '2012/03', '2014/04', 'phpbbmodders_newspage_archive_page_controller#' . serialize(array('year' => 2014, 'month' => '04', 'page' => 2))),
+			array(false, '2012/03', '2014/04', 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(true, '2012/03', false, 'phpbbmodders_newspage_archive_page_controller#' . serialize(array('year' => 2012, 'month' => '03', 'page' => 2))),
+			array(false, '2012/03', false, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(true, '2012/03', true, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
+			array(false, '2012/03', true, 'phpbbmodders_newspage_page_controller#' . serialize(array('page' => 2))),
 		);
 	}
 
