@@ -1,6 +1,14 @@
 <?php
+/**
+ *
+ * NV Newspage extension for the phpBB Forum Software package
+ *
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
 
-namespace nickvergessen\newspage\acp;
+namespace phpbbmodders\newspage\acp;
 
 class main_module
 {
@@ -10,9 +18,9 @@ class main_module
 
 	public function main($id, $mode)
 	{
-		global $auth, $config, $request, $template, $user, $phpbb_container;
+		global $auth, $config, $request, $template, $user, $phpbb_container, $phpbb_log;
 
-		$user->add_lang_ext('nickvergessen/newspage', array('newspage', 'info_acp_newspage'));
+		$user->add_lang_ext('phpbbmodders/newspage', array('newspage', 'info_acp_newspage'));
 		$this->tpl_name = 'acp_newspage_settings';
 		$this->page_title = 'ACP_NEWSPAGE_SETTINGS';
 
@@ -36,9 +44,9 @@ class main_module
 				trigger_error($user->lang('NEWS_ICON_INVALID') . adm_back_link($this->u_action), E_USER_WARNING);
 			}
 
-			$phpbb_container->get('nickvergessen.newspage.controller.settings')->save_settings();
+			$phpbb_container->get('phpbbmodders.newspage.controller.settings')->save_settings();
 			$config->set('news_icon', $icon);
-			add_log('admin', 'LOG_NEWSPAGE_SETTINGS');
+			$phpbb_log->add('admin', $user->data['user_id'], $user->ip, 'LOG_NEWSPAGE_SETTINGS');
 			trigger_error($user->lang('NEWS_SAVED') . adm_back_link($this->u_action));
 		}
 

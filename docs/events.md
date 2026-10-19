@@ -1,6 +1,6 @@
 # Available php Events
 
-### nickvergessen.newspage.newspage
+### phpbbmodders.newspage.newspage
 * Locations:
     + controller/main.php
 * Variables:
@@ -11,7 +11,7 @@
 * Since: 1.2
 * Purpose: You can use this event to load settings on the newspage
 
-### nickvergessen.newspage.single_news
+### phpbbmodders.newspage.single_news
 * Locations:
     + controller/main.php
 * Variables:
@@ -23,36 +23,36 @@ newspage
 
 # Available Template Events
 
-### nickvergessen_newspage_after
+### phpbbmodders_newspage_after
 * Locations:
     + styles/prosilver/template/newspage_body.html
 * Since: 1.2
 * Purpose: Add content after the output of the newspage
 
-### nickvergessen_newspage_before
+### phpbbmodders_newspage_before
 * Locations:
     + styles/prosilver/template/newspage_body.html
 * Since: 1.2
 * Purpose: Add content before the output of the newspage
 
-### nickvergessen_newspage_filters_after
+### phpbbmodders_newspage_filters_after
 * Locations:
     + styles/prosilver/template/newspage_body.html
 * Since: 1.2
 * Purpose: Add content after the list of filters
 
-### nickvergessen_newspage_filters_before
+### phpbbmodders_newspage_filters_before
 * Locations:
     + styles/prosilver/template/newspage_body.html
 * Since: 1.2
 * Purpose: Add content before the list of filters
 
-### nickvergessen_newspage_title_after
+### phpbbmodders_newspage_title_after
 * Locations:
     + styles/prosilver/template/newspage_body.html
 * Since: 1.2
 * Purpose: Add content after the title of the newspage
-For before event use `### nickvergessen_newspage_before`
+For before event use `### phpbbmodders_newspage_before`
 
 ### viewtopic_body_avatar_after
 * Locations:

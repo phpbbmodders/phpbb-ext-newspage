@@ -1,16 +1,16 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage\event;
+namespace phpbbmodders\newspage\event;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -18,11 +18,11 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * Class menu_link_listener
  * Creates the link in the head navbar
  *
- * @package nickvergessen\newspage\event
+ * @package phpbbmodders\newspage\event
  */
 class menu_link_listener implements EventSubscriberInterface
 {
-	/* @var \nickvergessen\newspage\helper */
+	/* @var \phpbbmodders\newspage\helper */
 	protected $helper;
 
 	/* @var \phpbb\template\template */
@@ -36,7 +36,7 @@ class menu_link_listener implements EventSubscriberInterface
 	 *
 	 * @return array
 	 */
-	static public function getSubscribedEvents()
+	public static function getSubscribedEvents()
 	{
 		return array(
 			'core.user_setup'						=> 'load_language_on_setup',
@@ -47,11 +47,11 @@ class menu_link_listener implements EventSubscriberInterface
 	/**
 	 * Constructor
 	 *
-	 * @param \nickvergessen\newspage\helper $helper
+	 * @param \phpbbmodders\newspage\helper $helper
 	 * @param \phpbb\template\template $template
 	 * @param \phpbb\config\config $config
 	 */
-	public function __construct(\nickvergessen\newspage\helper $helper, \phpbb\template\template $template, \phpbb\config\config $config)
+	public function __construct(\phpbbmodders\newspage\helper $helper, \phpbb\template\template $template, \phpbb\config\config $config)
 	{
 		$this->helper = $helper;
 		$this->template = $template;
@@ -66,7 +66,7 @@ class menu_link_listener implements EventSubscriberInterface
 	{
 		$lang_set_ext = $event['lang_set_ext'];
 		$lang_set_ext[] = array(
-			'ext_name' => 'nickvergessen/newspage',
+			'ext_name' => 'phpbbmodders/newspage',
 			'lang_set' => 'newspage',
 		);
 		$event['lang_set_ext'] = $lang_set_ext;

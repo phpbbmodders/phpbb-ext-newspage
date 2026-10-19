@@ -1,16 +1,16 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage\controller;
+namespace phpbbmodders\newspage\controller;
 
 /**
  * Class main
@@ -21,7 +21,7 @@ namespace nickvergessen\newspage\controller;
  *		/page/{page}				[optional]
  *	/news/{topic_id}				[optional]
  *
- * @package nickvergessen\newspage\controller
+ * @package phpbbmodders\newspage\controller
  */
 class main
 {
@@ -40,7 +40,7 @@ class main
 	/* @var \phpbb\controller\helper */
 	protected $helper;
 
-	/* @var \nickvergessen\newspage\newspage */
+	/* @var \phpbbmodders\newspage\newspage */
 	protected $newspage;
 
 	/* @var string phpBB root path */
@@ -57,11 +57,11 @@ class main
 	 * @param \phpbb\template\template $template
 	 * @param \phpbb\user $user
 	 * @param \phpbb\controller\helper $helper
-	 * @param \nickvergessen\newspage\newspage $newspage
+	 * @param \phpbbmodders\newspage\newspage $newspage
 	 * @param string $root_path
 	 * @param string $php_ext
 	 */
-	public function __construct(\phpbb\config\config $config, \phpbb\event\dispatcher $dispatcher, \phpbb\template\template $template, \phpbb\user $user, \phpbb\controller\helper $helper, \nickvergessen\newspage\newspage $newspage, $root_path, $php_ext)
+	public function __construct(\phpbb\config\config $config, \phpbb\event\dispatcher $dispatcher, \phpbb\template\template $template, \phpbb\user $user, \phpbb\controller\helper $helper, \phpbbmodders\newspage\newspage $newspage, $root_path, $php_ext)
 	{
 		$this->config = $config;
 		$this->dispatcher = $dispatcher;

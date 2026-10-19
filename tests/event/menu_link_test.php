@@ -1,28 +1,27 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage\tests\event;
+namespace phpbbmodders\newspage\tests\event;
 
-use nickvergessen\newspage\event\menu_link_listener;
-use nickvergessen\newspage\helper;
+use phpbbmodders\newspage\event\menu_link_listener;
+use phpbbmodders\newspage\helper;
 use phpbb\config\config;
 use phpbb\event\data;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * Class menu_link_test
- * Testing \nickvergessen\newspage\event\menu_link_listener
+ * Testing \phpbbmodders\newspage\event\menu_link_listener
  *
- * @package nickvergessen\newspage\tests\event
+ * @package phpbbmodders\newspage\tests\event
  */
 class menu_link_test extends \PHPUnit\Framework\TestCase
 {
@@ -91,7 +90,7 @@ class menu_link_test extends \PHPUnit\Framework\TestCase
 				array(),
 				array(
 					array(
-						'ext_name' => 'nickvergessen/newspage',
+						'ext_name' => 'phpbbmodders/newspage',
 						'lang_set' => 'newspage',
 					),
 				),
@@ -109,7 +108,7 @@ class menu_link_test extends \PHPUnit\Framework\TestCase
 						'lang_set' => 'main',
 					),
 					array(
-						'ext_name' => 'nickvergessen/newspage',
+						'ext_name' => 'phpbbmodders/newspage',
 						'lang_set' => 'newspage',
 					),
 				),
@@ -124,12 +123,9 @@ class menu_link_test extends \PHPUnit\Framework\TestCase
 	{
 		$this->setup_listener();
 
-		$dispatcher = new EventDispatcher();
-		$dispatcher->addListener('core.user_setup', array($this->listener, 'load_language_on_setup'));
-
 		$event_data = array('lang_set_ext');
 		$event = new data(compact($event_data));
-		$dispatcher->dispatch('core.user_setup', $event);
+		$this->listener->load_language_on_setup($event);
 
 		extract($event->get_data_filtered($event_data));
 
@@ -155,12 +151,10 @@ class menu_link_test extends \PHPUnit\Framework\TestCase
 		$this->template->expects($this->once())
 			->method('assign_vars')
 			->with(array(
-				'U_NEWSPAGE' => 'nickvergessen_newspage_controller#a:0:{}',
+				'U_NEWSPAGE' => 'phpbbmodders_newspage_controller#a:0:{}',
 				'NEWSPAGE_ICON' => $icon,
 			));
 
-		$dispatcher = new EventDispatcher();
-		$dispatcher->addListener('core.page_header', array($this->listener, 'add_page_header_link'));
-		$dispatcher->dispatch('core.page_header');
+		$this->listener->add_page_header_link();
 	}
 }

@@ -1,21 +1,21 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage;
+namespace phpbbmodders\newspage;
 
 /**
  * Class helper
  *
- * @package nickvergessen\newspage
+ * @package phpbbmodders\newspage
  */
 class helper
 {
@@ -43,7 +43,7 @@ class helper
 	* @param	mixed	$force_category		Overwrites the category, false for disabled, integer otherwise
 	* @param	mixed	$force_archive		Overwrites the archive, false for disabled, string otherwise
 	* @param	mixed	$force_page			Overwrites the page, false for disabled, string otherwise
-	* @return	\nickvergessen\newspage\route		Full URL with append_sid performed on it
+	* @return	\phpbbmodders\newspage\route		Full URL with append_sid performed on it
 	*/
 	public function generate_route($force_category = false, $force_archive = false, $force_page = false)
 	{

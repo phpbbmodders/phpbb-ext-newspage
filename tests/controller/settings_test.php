@@ -1,215 +1,141 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage\tests\controller;
+namespace phpbbmodders\newspage\tests\controller;
 
-use nickvergessen\newspage\tests\mock\settings_controller;
+use phpbbmodders\newspage\controller\settings;
 use phpbb\config\config;
 use phpbb\exception\http_exception;
-use phpbb\request\request_interface;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class settings_test
- * Testing \nickvergessen\newspage\controller\settings
- *
- * @package nickvergessen\newspage\tests\controller
+ * Testing \phpbbmodders\newspage\controller\settings
  */
 class settings_test extends \PHPUnit\Framework\TestCase
 {
 	/**
+	 * Submitted form values and the settings they should save.
+	 *
 	 * @return array
 	 */
-	public function manage_data()
+	public function save_settings_data()
 	{
 		return array(
-			array(
+			'values are saved' => array(
 				array(
-					array('a_board', 0, true),
+					'news_char_limit'	=> 250,
+					'news_forums'		=> array(2, 5),
+					'news_number'		=> 7,
+					'news_pages'		=> 3,
+					'news_user_info'	=> true,
+					'news_post_buttons'	=> false,
+					'news_shadow_show'	=> true,
+					'news_attach_show'	=> false,
+					'news_cat_show'		=> true,
+					'news_archive_show'	=> true,
 				),
 				array(
-					array('submit', true),
-					array('creation_time', true),
-					array('form_token', true),
+					'news_char_limit'	=> 250,
+					'news_forums'		=> '2,5',
+					'news_number'		=> 7,
+					'news_pages'		=> 3,
+					'news_user_info'	=> true,
+					'news_post_buttons'	=> false,
+					'news_shadow'		=> true,
+					'news_attach_show'	=> false,
+					'news_cat_show'		=> true,
+					'news_archive_show'	=> true,
+				),
+			),
+			'limits are applied' => array(
+				array(
+					'news_char_limit'	=> 20,
+					'news_number'		=> 0,
+					'news_pages'		=> -2,
 				),
 				array(
-					array('creation_time', 0, false, request_interface::REQUEST, 0),
-					array('form_token', '', false, request_interface::REQUEST, sha1('0newspage')),
-					array('news_forums', array(0), false, request_interface::REQUEST, array()),
+					'news_char_limit'	=> 100,
+					'news_forums'		=> '0',
+					'news_number'		=> 1,
+					'news_pages'		=> 1,
 				),
-				200,
-				'NEWS_SAVED',
+			),
+			'0 characters means no shortening' => array(
+				array(
+					'news_char_limit'	=> 0,
+				),
+				array(
+					'news_char_limit'	=> 0,
+				),
 			),
 		);
 	}
 
 	/**
-	 * @dataProvider manage_data
+	 * @dataProvider save_settings_data
 	 *
-	 * @param array $auth_map
-	 * @param array $request_map
-	 * @param array $variable_map
-	 * @param int $status_code
-	 * @param string $page_content
+	 * @param array $submitted Form values by name
+	 * @param array $expected  Config values that must be saved
 	 */
-	public function test_manage(array $auth_map, array $request_map, array $variable_map, $status_code, $page_content)
+	public function test_save_settings(array $submitted, array $expected)
 	{
-		$controller = $this->get_controller($auth_map, $request_map, $variable_map, true);
-		$response = $controller->manage();
+		$config = new config(array());
+		$this->get_controller(true, $submitted, $config)->save_settings();
 
-		$this->assertInstanceOf('\Symfony\Component\HttpFoundation\Response', $response);
-		$this->assertEquals($page_content, $response->getContent());
-		$this->assertEquals($status_code, $response->getStatusCode());
+		foreach ($expected as $name => $value)
+		{
+			$this->assertEquals($value, $config[$name], $name);
+		}
 	}
 
-	/**
-	 * @return array
-	 */
-	public function manage_throws_data()
+	public function test_save_settings_needs_a_board()
 	{
-		return array(
-			array(
-				array(
-					array('a_board', 0, false),
-				),
-				array(),
-				array(),
-				403,
-				'NO_AUTH_OPERATION',
-			),
-			array(
-				array(
-					array('a_board', 0, true),
-				),
-				array(),
-				array(),
-				400,
-				'FORM_INVALID',
-			),
-			array(
-				array(
-					array('a_board', 0, true),
-				),
-				array(
-					array('submit', true),
-					array('creation_time', true),
-					array('form_token', true),
-				),
-				array(),
-				400,
-				'FORM_INVALID',
-			),
-		);
-	}
+		$config = new config(array());
 
-	/**
-	 * @dataProvider manage_throws_data
-	 *
-	 * @param array $auth_map
-	 * @param array $request_map
-	 * @param array $variable_map
-	 * @param int $status_code
-	 * @param string $page_content
-	 */
-	public function test_manage_throws(array $auth_map, array $request_map, array $variable_map, $status_code, $page_content)
-	{
-
-		$controller = $this->get_controller($auth_map, $request_map, $variable_map, false);
 		try
 		{
-			$controller->manage();
-			$this->fail('Expected \phpbb\exception\http_exception to be thrown'
-				. ' but no exception thrown');
+			$this->get_controller(false, array('news_number' => 9), $config)->save_settings();
+			$this->fail('Expected \phpbb\exception\http_exception to be thrown');
 		}
 		catch (http_exception $exception)
 		{
-			$this->assertEquals($status_code, $exception->getStatusCode());
-			$this->assertEquals($page_content, $exception->getMessage());
+			$this->assertEquals(403, $exception->getStatusCode());
+			$this->assertEquals('NO_AUTH_OPERATION', $exception->getMessage());
 		}
-		catch (\Exception $exception)
-		{
-			$this->fail('Expected \phpbb\exception\http_exception to be thrown'
-				. ' but "' . get_class($exception) . '" thrown');
-		}
+
+		$this->assertFalse(isset($config['news_number']));
 	}
 
 	/**
-	 * @param array $auth_map
-	 * @param array $request_map
-	 * @param array $variable_map
-	 * @param bool $language_loaded
-	 * @return \nickvergessen\newspage\controller\settings
+	 * @param bool   $is_admin  Whether the user has a_board
+	 * @param array  $submitted Form values by name; missing ones get the default
+	 * @param config $config
+	 * @return settings
 	 */
-	protected function get_controller(array $auth_map, array $request_map, array $variable_map, $language_loaded)
+	protected function get_controller($is_admin, array $submitted, config $config)
 	{
-		global $request;
-
-		$_POST['creation_time'] = $_POST['form_token'] = 0;
 		$auth = $this->createMock('\phpbb\auth\auth');
-		$auth->expects($this->any())
-			->method('acl_get')
-			->with($this->stringContains('_'), $this->anything())
-			->will($this->returnValueMap($auth_map));
-
-		$request = $this->createMock('\phpbb\request\request');
-		$request->expects($this->any())
-			->method('is_set_post')
-			->with($this->anything())
-			->will($this->returnValueMap($request_map));
-
-		$request->expects($this->any())
-			->method('variable')
-			->with($this->anything())
-			->will($this->returnValueMap($variable_map));
-
-		$controller_helper = $this->getMockBuilder('\phpbb\controller\helper')
-			->disableOriginalConstructor()
-			->getMock();
-		$controller_helper->expects($this->any())
-			->method('message')
-			->willReturnCallback(function ($message, $parameters = array(), $title = 'INFORMATION', $code = 200) {
-				// TODO php 5.4: $this->assertInternalType('array', $parameters);
-				// TODO php 5.4: $this->assertEmtpy($parameters);
-				if (!is_array($parameters) || !empty($parameters))
-				{
-					throw new \InvalidArgumentException('Expected $parameters to be an empty array');
-				}
-
-				// TODO php 5.4: $this->assertEquals('INFORMATION', $title);
-				if ($title !== 'INFORMATION')
-				{
-					throw new \InvalidArgumentException('Expected $title to be \'INFORMATION\'');
-				}
-
-				return new Response($message, $code);
+		$auth->method('acl_get')
+			->willReturnCallback(function ($option) use ($is_admin) {
+				return $option === 'a_board' && $is_admin;
 			});
 
-		$user = $this->getMockBuilder('\phpbb\user')
-			->disableOriginalConstructor()
-			->getMock();
-		$user->expects($language_loaded ? $this->once() : $this->never())
-			->method('add_lang_ext')
-			->with('nickvergessen/newspage', 'newspage');
+		$request = $this->createMock('\phpbb\request\request');
+		$request->method('variable')
+			->willReturnCallback(function ($name, $default) use ($submitted) {
+				return array_key_exists($name, $submitted) ? $submitted[$name] : $default;
+			});
 
 		/** @var \phpbb\auth\auth $auth */
 		/** @var \phpbb\request\request $request */
-		/** @var \phpbb\controller\helper $controller_helper */
-		/** @var \phpbb\user $user */
-		return new settings_controller(
-			$auth,
-			new config(array()),
-			$request,
-			$controller_helper,
-			$user
-		);
+		return new settings($auth, $config, $request);
 	}
 }

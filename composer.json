@@ -1,26 +1,39 @@
 {
-	"name": "nickvergessen/newspage",
+	"name": "phpbbmodders/newspage",
 	"type": "phpbb-extension",
-	"description": "Adds a extra-page to the board where a switchable number of news are displayed. The text can be shorten to a certain number of chars. Also the Icons can be switched of (post icons, user icons)",
-	"homepage": "https://github.com/phpbbmodders/phpbb-ext-newspage",
+	"description": "A news page that shows the latest topics from chosen forums, shortened to a set length, with monthly archives and categories.",
+	"homepage": "https://www.phpbbmodders.com/",
 	"version": "1.4.0-dev",
-	"license": "GPL-2.0",
+	"keywords": [
+		"phpbb",
+		"extension",
+		"news",
+		"newspage"
+	],
+	"license": "GPL-2.0-only",
 	"authors": [
+		{
+			"name": "phpBB Modders",
+			"email": "board@phpbbmodders.com",
+			"homepage": "https://www.phpbbmodders.com/",
+			"role": "Extension Developer"
+		},
 		{
 			"name": "Joas Schilling",
 			"email": "nickvergessen@gmx.de",
 			"homepage": "https://github.com/nickvergessen",
-			"role": "Developer"
+			"role": "Past Developer"
 		}
 	],
 	"require": {
-		"php": ">=7.2",
-		"ext-dom": "*"
+		"php": ">=7.4",
+		"ext-dom": "*",
+		"composer/installers": "^1.0 || ^2.0"
 	},
 	"extra": {
-		"display-name": "NV Newspage Extension",
+		"display-name": "NV Newspage",
 		"soft-require": {
-			"phpbb/phpbb": ">=3.3.19,<4.0.0@dev"
+			"phpbb/phpbb": ">=3.3.19,<4.1.0@dev"
 		}
 	}
 }

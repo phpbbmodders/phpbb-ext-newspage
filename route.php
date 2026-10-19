@@ -1,21 +1,21 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage;
+namespace phpbbmodders\newspage;
 
 /**
  * Class route
  *
- * @package nickvergessen\newspage
+ * @package phpbbmodders\newspage
  */
 class route
 {
@@ -123,7 +123,7 @@ class route
 	 */
 	public function get_route($force_category = false, $force_archive = false, $force_page = false)
 	{
-		$route = 'nickvergessen_newspage';
+		$route = 'phpbbmodders_newspage';
 		if ($this->config['news_cat_show'])
 		{
 			$route .= $this->get_route_category($force_category);

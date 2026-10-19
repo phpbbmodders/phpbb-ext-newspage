@@ -1,33 +1,31 @@
 services:
-    nickvergessen.newspage.controller:
-        class: nickvergessen\newspage\controller\main
+    phpbbmodders.newspage.controller:
+        class: phpbbmodders\newspage\controller\main
         arguments:
             - "@config"
             - "@dispatcher"
             - "@template"
             - "@user"
             - "@controller.helper"
-            - "@nickvergessen.newspage"
+            - "@phpbbmodders.newspage"
             - "%core.root_path%"
             - "%core.php_ext%"
 
-    nickvergessen.newspage.controller.settings:
-        class: nickvergessen\newspage\controller\settings
+    phpbbmodders.newspage.controller.settings:
+        class: phpbbmodders\newspage\controller\settings
         arguments:
             - "@auth"
             - "@config"
             - "@request"
-            - "@controller.helper"
-            - "@user"
 
-    nickvergessen.newspage.helper:
-        class: nickvergessen\newspage\helper
+    phpbbmodders.newspage.helper:
+        class: phpbbmodders\newspage\helper
         arguments:
             - "@controller.helper"
             - "@config"
 
-    nickvergessen.newspage:
-        class: nickvergessen\newspage\newspage
+    phpbbmodders.newspage:
+        class: phpbbmodders\newspage\newspage
         arguments:
             - "@auth"
             - "@cache"
@@ -38,24 +36,27 @@ services:
             - "@user"
             - "@content.visibility"
             - "@controller.helper"
-            - "@nickvergessen.newspage.helper"
+            - "@phpbbmodders.newspage.helper"
             - "@pagination"
             - "%core.root_path%"
             - "%core.php_ext%"
+        calls:
+            # phpBB 4.0's avatar helper; phpBB 3.3 has none, so it gets null
+            - [set_avatar_helper, ['@?avatar.helper']]
 
-    nickvergessen.newspage.menu_link_listener:
-        class: nickvergessen\newspage\event\menu_link_listener
+    phpbbmodders.newspage.menu_link_listener:
+        class: phpbbmodders\newspage\event\menu_link_listener
         arguments:
-            - "@nickvergessen.newspage.helper"
+            - "@phpbbmodders.newspage.helper"
             - "@template"
             - "@config"
         tags:
             - { name: event.listener }
 
-    nickvergessen.newspage.viewonline_listener:
-        class: nickvergessen\newspage\event\viewonline_listener
+    phpbbmodders.newspage.viewonline_listener:
+        class: phpbbmodders\newspage\event\viewonline_listener
         arguments:
-            - "@nickvergessen.newspage.helper"
+            - "@phpbbmodders.newspage.helper"
             - "@user"
             - "%core.php_ext%"
         tags:

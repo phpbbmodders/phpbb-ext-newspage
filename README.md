@@ -18,9 +18,9 @@ Also the icons can be switched on/off (post icons, user icons)
 
 ## Development Installation
 
-Clone into phpBB/ext/nickvergessen/newspage:
+Clone into phpBB/ext/phpbbmodders/newspage:
 
-    git clone https://github.com/phpbbmodders/phpbb-ext-newspage.git phpBB/ext/nickvergessen/newspage
+    git clone https://github.com/phpbbmodders/phpbb-ext-newspage.git phpBB/ext/phpbbmodders/newspage
 
 Set up the dependencies:
 

@@ -1,21 +1,21 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage;
+namespace phpbbmodders\newspage;
 
 /**
  * Class newspage
  *
- * @package nickvergessen\newspage
+ * @package phpbbmodders\newspage
  */
 class newspage
 {
@@ -37,10 +37,12 @@ class newspage
 	protected $content_visibility;
 	/** @var \phpbb\controller\helper */
 	protected $helper;
-	/** @var \nickvergessen\newspage\helper */
+	/** @var \phpbbmodders\newspage\helper */
 	protected $news_helper;
 	/** @var \phpbb\pagination */
 	protected $pagination;
+	/** @var \phpbb\avatar\helper|null phpBB 4.0's avatar helper; null on phpBB 3.3 */
+	protected $avatar_helper;
 
 	/** @var string */
 	protected $root_path;
@@ -84,12 +86,12 @@ class newspage
 	* @param \phpbb\user		$user		User object
 	* @param \phpbb\content_visibility		$content_visibility	Content visibility object
 	* @param \phpbb\controller\helper		$helper				Controller helper object
-	* @param \nickvergessen\newspage\helper $news_helper				Controller helper object
+	* @param \phpbbmodders\newspage\helper $news_helper				Controller helper object
 	* @param \phpbb\pagination	$pagination	Pagination object
 	* @param string			$root_path	phpBB root path
 	* @param string			$php_ext	phpEx
 	*/
-	public function __construct(\phpbb\auth\auth $auth, \phpbb\cache\service $cache, \phpbb\config\config $config, \phpbb\db\driver\driver_interface $db, \phpbb\request\request_interface $request, \phpbb\template\template $template, \phpbb\user $user, \phpbb\content_visibility $content_visibility, \phpbb\controller\helper $helper, \nickvergessen\newspage\helper $news_helper, \phpbb\pagination $pagination, $root_path, $php_ext)
+	public function __construct(\phpbb\auth\auth $auth, \phpbb\cache\service $cache, \phpbb\config\config $config, \phpbb\db\driver\driver_interface $db, \phpbb\request\request_interface $request, \phpbb\template\template $template, \phpbb\user $user, \phpbb\content_visibility $content_visibility, \phpbb\controller\helper $helper, \phpbbmodders\newspage\helper $news_helper, \phpbb\pagination $pagination, $root_path, $php_ext)
 	{
 		$this->auth = $auth;
 		$this->cache = $cache;
@@ -110,6 +112,50 @@ class newspage
 			include($this->root_path . 'includes/functions_display.' . $this->php_ext);
 		}
 		$this->page_title = $this->user->lang['NEWS'];
+	}
+
+	/**
+	 * Set phpBB 4.0's avatar helper. phpBB 3.3 has none and passes null.
+	 *
+	 * @param \phpbb\avatar\helper|null $avatar_helper
+	 * @return void
+	 */
+	public function set_avatar_helper($avatar_helper = null)
+	{
+		$this->avatar_helper = $avatar_helper;
+	}
+
+	/**
+	 * The poster's avatar as an image tag, as phpBB 3.3 makes it.
+	 *
+	 * phpBB 4.0 has no phpbb_get_user_avatar(); its avatar helper returns the
+	 * avatar's data instead, which is turned into the same markup here so the
+	 * news templates work on both versions.
+	 *
+	 * @param array $row User row with the user_avatar* columns
+	 * @return string Image tag, or an empty string for no avatar
+	 */
+	protected function get_poster_avatar(array $row)
+	{
+		if (function_exists('phpbb_get_user_avatar'))
+		{
+			return phpbb_get_user_avatar($row);
+		}
+
+		if ($this->avatar_helper === null)
+		{
+			return '';
+		}
+
+		$avatar = $this->avatar_helper->get_user_avatar($row);
+		if (empty($avatar['src']))
+		{
+			return '';
+		}
+
+		return '<img class="avatar" src="' . utf8_htmlspecialchars($avatar['src']) . '"'
+			. ' width="' . (int) $avatar['width'] . '" height="' . (int) $avatar['height'] . '"'
+			. ' alt="' . utf8_htmlspecialchars($avatar['title']) . '" />';
 	}
 
 	/**
@@ -361,7 +407,8 @@ class newspage
 			$row['rank_image'] = $rank_data['img'];
 			$row['rank_image_src'] = $rank_data['img_src'];
 
-			$row['user_jabber'] = ($row['user_jabber'] && $this->auth->acl_get('u_sendim')) ? append_sid("{$this->root_path}memberlist.{$this->php_ext}", "mode=contact&amp;action=jabber&amp;u=$poster_id") : '';
+			// phpBB 4.0 has no Jabber field, so the column may be missing
+			$row['user_jabber'] = (!empty($row['user_jabber']) && $this->auth->acl_get('u_sendim')) ? append_sid("{$this->root_path}memberlist.{$this->php_ext}", "mode=contact&amp;action=jabber&amp;u=$poster_id") : '';
 
 			// Can this user receive a Private Message?
 			$can_receive_pm = (
@@ -407,7 +454,7 @@ class newspage
 				'U_REPORT'				=> ($this->auth->acl_get('f_report', $forum_id)) ? append_sid("{$this->root_path}report.{$this->php_ext}", 'f=' . $forum_id . '&amp;p=' . $row['post_id']) : '',
 				'U_NOTES'				=> ($this->auth->acl_getf_global('m_')) ? append_sid("{$this->root_path}mcp.{$this->php_ext}", 'i=notes&amp;mode=user_notes&amp;u=' . $poster_id, true, $this->user->session_id) : '',
 				'U_WARN'				=> ($this->auth->acl_get('m_warn') && $poster_id != $this->user->data['user_id'] && $poster_id != ANONYMOUS) ? append_sid("{$this->root_path}mcp.{$this->php_ext}", 'i=warn&amp;mode=warn_post&amp;f=' . $forum_id . '&amp;p=' . $post_id, true, $this->user->session_id) : '',
-				'U_NEWS'				=> $this->helper->route('nickvergessen_newspage_singlenews_controller', array('topic_id' => $topic_id)),
+				'U_NEWS'				=> $this->helper->route('phpbbmodders_newspage_singlenews_controller', array('topic_id' => $topic_id)),
 
 				'POST_ICON_IMG'			=> (!empty($row['icon_id'])) ? $icons[$row['icon_id']]['img'] : '',
 				'POST_ICON_IMG_WIDTH'	=> (!empty($row['icon_id'])) ? $icons[$row['icon_id']]['width'] : '',
@@ -434,7 +481,7 @@ class newspage
 				'SIGNATURE'				=> ($row['enable_sig']) ? $row['user_sig'] : '',
 				'NEWS_COMMENTS'			=> $this->content_visibility->get_count('topic_posts', $row, $forum_id) - 1,
 
-				'POSTER_AVATAR'			=> ($this->user->optionget('viewavatars')) ? phpbb_get_user_avatar($row) : '',
+				'POSTER_AVATAR'			=> ($this->user->optionget('viewavatars')) ? $this->get_poster_avatar($row) : '',
 				'U_POST_AUTHOR'			=> get_username_string('profile', $poster_id, $row['username'], $row['user_colour'], $row['post_username']),
 				'RANK_TITLE'			=> $row['rank_title'],
 				'RANK_IMG'				=> $row['rank_image'],
@@ -459,12 +506,16 @@ class newspage
 					'NAME'		=> $this->user->lang['SEND_EMAIL'],
 					'U_CONTACT'	=> $u_email,
 				),
-				array(
+			);
+
+			if ($row['user_jabber'])
+			{
+				$contact_fields[] = array(
 					'ID'		=> 'jabber',
 					'NAME'		=> $this->user->lang['JABBER'],
-					'U_CONTACT'	=> ($row['user_jabber'] && $this->auth->acl_get('u_sendim')) ? append_sid("{$this->root_path}memberlist.{$this->php_ext}", "mode=contact&amp;action=jabber&amp;u=$poster_id") : '',
-				),
-			);
+					'U_CONTACT'	=> $row['user_jabber'],
+				);
+			}
 
 			foreach ($contact_fields as $field)
 			{
@@ -661,7 +712,7 @@ class newspage
 			ORDER BY left_id ASC';
 		$result = $this->db->sql_query($sql);
 
-		/** @var \nickvergessen\newspage\route $route */
+		/** @var \phpbbmodders\newspage\route $route */
 		$route = $this->news_helper->generate_route($this->category, $this->archive);
 		while ($row = $this->db->sql_fetchrow($result))
 		{
@@ -757,7 +808,7 @@ class newspage
 					$this->num_pagination_items += $archive['count'];
 				}
 
-				/** @var \nickvergessen\newspage\route $route */
+				/** @var \phpbbmodders\newspage\route $route */
 				$route = $this->news_helper->generate_route($this->category, $this->archive);
 				$this->template->assign_block_vars('archive_block.archive_row', array(
 					'U_NEWS_MONTH'		=> $route->get_url(($active_archive) ? '' : empty($this->config['news_cat_show']), $archive['url']),
@@ -817,7 +868,7 @@ class newspage
 			$pagination_news = $this->num_pagination_items;
 		}
 
-		/** @var \nickvergessen\newspage\route $route */
+		/** @var \phpbbmodders\newspage\route $route */
 		$route = $this->news_helper->generate_route($this->category, $this->archive);
 		$this->pagination->generate_template_pagination(
 			array(

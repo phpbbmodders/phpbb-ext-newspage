@@ -1,25 +1,25 @@
 <?php
 
 /**
- * This file is part of the NV Newspage Extension package.
+ *
+ * NV Newspage extension for the phpBB Forum Software package
  *
  * @copyright (c) nickvergessen <https://github.com/nickvergessen>
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
  * @license GNU General Public License, version 2 (GPL-2.0)
  *
- * For full copyright and license information, please see
- * the license.txt file.
  */
 
-namespace nickvergessen\newspage\tests\route;
+namespace phpbbmodders\newspage\tests\route;
 
-use nickvergessen\newspage\route;
+use phpbbmodders\newspage\route;
 use phpbb\config\config;
 
 /**
  * Class get_params_test
- * Testing \nickvergessen\newspage\route::get_params()
+ * Testing \phpbbmodders\newspage\route::get_params()
  *
- * @package nickvergessen\newspage\tests\route
+ * @package phpbbmodders\newspage\tests\route
  */
 class get_params_test extends \PHPUnit\Framework\TestCase
 {

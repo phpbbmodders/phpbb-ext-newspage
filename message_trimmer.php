@@ -1,6 +1,14 @@
 <?php
+/**
+ *
+ * NV Newspage extension for the phpBB Forum Software package
+ *
+ * @copyright (c) 2026, phpBB Modders, https://www.phpbbmodders.com/
+ * @license GNU General Public License, version 2 (GPL-2.0)
+ *
+ */
 
-namespace nickvergessen\newspage;
+namespace phpbbmodders\newspage;
 
 /** Trims rendered messages without cutting HTML tags, entities, or UTF-8 characters. */
 class message_trimmer
