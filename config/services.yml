@@ -5,7 +5,6 @@ services:
             - "@config"
             - "@dispatcher"
             - "@template"
-            - "@user"
             - "@controller.helper"
             - "@phpbbmodders.newspage"
             - "%core.root_path%"
@@ -31,7 +30,7 @@ services:
             - "@cache"
             - "@config"
             - "@dbal.conn"
-            - "@request"
+            - "@profilefields.manager"
             - "@template"
             - "@user"
             - "@content.visibility"
@@ -58,6 +57,7 @@ services:
         arguments:
             - "@phpbbmodders.newspage.helper"
             - "@user"
+            - "@auth"
             - "%core.php_ext%"
         tags:
             - { name: event.listener }

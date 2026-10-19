@@ -34,9 +34,6 @@ class main
 	/* @var \phpbb\template\template */
 	protected $template;
 
-	/* @var \phpbb\user */
-	protected $user;
-
 	/* @var \phpbb\controller\helper */
 	protected $helper;
 
@@ -55,18 +52,16 @@ class main
 	 * @param \phpbb\config\config $config
 	 * @param \phpbb\event\dispatcher $dispatcher
 	 * @param \phpbb\template\template $template
-	 * @param \phpbb\user $user
 	 * @param \phpbb\controller\helper $helper
 	 * @param \phpbbmodders\newspage\newspage $newspage
 	 * @param string $root_path
 	 * @param string $php_ext
 	 */
-	public function __construct(\phpbb\config\config $config, \phpbb\event\dispatcher $dispatcher, \phpbb\template\template $template, \phpbb\user $user, \phpbb\controller\helper $helper, \phpbbmodders\newspage\newspage $newspage, $root_path, $php_ext)
+	public function __construct(\phpbb\config\config $config, \phpbb\event\dispatcher $dispatcher, \phpbb\template\template $template, \phpbb\controller\helper $helper, \phpbbmodders\newspage\newspage $newspage, $root_path, $php_ext)
 	{
 		$this->config = $config;
 		$this->dispatcher = $dispatcher;
 		$this->template = $template;
-		$this->user = $user;
 		$this->helper = $helper;
 		$this->newspage = $newspage;
 		$this->root_path = $root_path;
@@ -178,46 +173,11 @@ class main
 		}
 
 		$this->newspage->base();
-		$this->assign_images($this->config['news_user_info'], $this->config['news_post_buttons']);
 
 		$this->template->assign_vars(array(
 			'S_ON_NEWSPAGE'		=> true,
 		));
 
 		return $this->helper->render('newspage_body.html', $this->newspage->get_page_title());
-	}
-
-	/**
-	 * @param bool $assign_user_buttons
-	 * @param bool $assign_post_buttons
-	 */
-	protected function assign_images($assign_user_buttons, $assign_post_buttons)
-	{
-		$this->template->assign_vars(array(
-			'REPORTED_IMG'			=> $this->user->img('icon_topic_reported', 'POST_REPORTED'),
-		));
-
-		if ($assign_user_buttons)
-		{
-			$this->template->assign_vars(array(
-				'PROFILE_IMG'		=> $this->user->img('icon_user_profile', 'READ_PROFILE'),
-				'SEARCH_IMG'		=> $this->user->img('icon_user_search', 'SEARCH_USER_POSTS'),
-				'PM_IMG'			=> $this->user->img('icon_contact_pm', 'SEND_PRIVATE_MESSAGE'),
-				'EMAIL_IMG'			=> $this->user->img('icon_contact_email', 'SEND_EMAIL'),
-				'JABBER_IMG'		=> $this->user->img('icon_contact_jabber', 'JABBER'),
-			));
-		}
-
-		if ($assign_post_buttons)
-		{
-			$this->template->assign_vars(array(
-				'QUOTE_IMG'			=> $this->user->img('icon_post_quote', 'REPLY_WITH_QUOTE'),
-				'EDIT_IMG'			=> $this->user->img('icon_post_edit', 'EDIT_POST'),
-				'DELETE_IMG'		=> $this->user->img('icon_post_delete', 'DELETE_POST'),
-				'INFO_IMG'			=> $this->user->img('icon_post_info', 'VIEW_INFO'),
-				'REPORT_IMG'		=> $this->user->img('icon_post_report', 'REPORT_POST'),
-				'WARN_IMG'			=> $this->user->img('icon_user_warn', 'WARN_USER'),
-			));
-		}
 	}
 }

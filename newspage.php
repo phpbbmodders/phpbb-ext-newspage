@@ -27,8 +27,8 @@ class newspage
 	protected $config;
 	/** @var \phpbb\db\driver\driver_interface */
 	protected $db;
-	/** @var \phpbb\request\request_interface */
-	protected $request;
+	/** @var \phpbb\profilefields\manager */
+	protected $profile_fields;
 	/** @var \phpbb\template\template */
 	protected $template;
 	/** @var \phpbb\user */
@@ -62,9 +62,6 @@ class newspage
 	/** @var int */
 	protected $category = 0;
 
-	const ARCHIVE_SHOW = 1;
-	const ARCHIVE_PER_YEAR = 2;
-
 	/** @var int[] */
 	protected $post_ids;
 	/** @var int[] */
@@ -81,7 +78,7 @@ class newspage
 	* @param \phpbb\cache\service	$cache		Cache object
 	* @param \phpbb\config\config	$config		Config object
 	* @param \phpbb\db\driver\driver_interface	$db		Database object
-	* @param \phpbb\request\request_interface		$request	Request object
+	* @param \phpbb\profilefields\manager	$profile_fields	Profile fields manager
 	* @param \phpbb\template\template	$template	Template object
 	* @param \phpbb\user		$user		User object
 	* @param \phpbb\content_visibility		$content_visibility	Content visibility object
@@ -91,13 +88,13 @@ class newspage
 	* @param string			$root_path	phpBB root path
 	* @param string			$php_ext	phpEx
 	*/
-	public function __construct(\phpbb\auth\auth $auth, \phpbb\cache\service $cache, \phpbb\config\config $config, \phpbb\db\driver\driver_interface $db, \phpbb\request\request_interface $request, \phpbb\template\template $template, \phpbb\user $user, \phpbb\content_visibility $content_visibility, \phpbb\controller\helper $helper, \phpbbmodders\newspage\helper $news_helper, \phpbb\pagination $pagination, $root_path, $php_ext)
+	public function __construct(\phpbb\auth\auth $auth, \phpbb\cache\service $cache, \phpbb\config\config $config, \phpbb\db\driver\driver_interface $db, \phpbb\profilefields\manager $profile_fields, \phpbb\template\template $template, \phpbb\user $user, \phpbb\content_visibility $content_visibility, \phpbb\controller\helper $helper, \phpbbmodders\newspage\helper $news_helper, \phpbb\pagination $pagination, $root_path, $php_ext)
 	{
 		$this->auth = $auth;
 		$this->cache = $cache;
 		$this->config = $config;
 		$this->db = $db;
-		$this->request = $request;
+		$this->profile_fields = $profile_fields;
 		$this->template = $template;
 		$this->user = $user;
 		$this->content_visibility = $content_visibility;
@@ -329,9 +326,12 @@ class newspage
 			return;
 		}
 
-		// Grab ranks, icons, online-status and attachments
+		// The "last edited by" notice uses viewtopic's language strings
+		$this->user->add_lang('viewtopic');
+
+		// Grab icons, attachments and profile fields
 		$icons = $this->cache->obtain_icons();
-		$user_online_tracking_info = (!empty($this->poster_ids)) ? $this->get_online_posters($this->poster_ids) : array();
+		$profile_fields = ($this->config['news_user_info']) ? $this->get_profile_fields($this->poster_ids) : array();
 		$attachments = (!empty($this->post_ids)) ? $this->get_attachments($this->post_ids) : array();
 
 		// Get topic tracking
@@ -362,15 +362,18 @@ class newspage
 		);
 		$sql = $this->db->sql_build_query('SELECT', $sql_array);
 		$result = $this->db->sql_query($sql);
+		$rows = $this->db->sql_fetchrowset($result);
+		$this->db->sql_freeresult($result);
 
-		while ($row = $this->db->sql_fetchrow($result))
+		$editors = $this->get_editors($rows);
+
+		foreach ($rows as $row)
 		{
 			// Set some variables
 			$post_id = (int) $row['post_id'];
 			$poster_id = (int) $row['poster_id'];
 			$topic_id = (int) $row['topic_id'];
 			$forum_id = (int) $row['forum_id'];
-			$post_edit_list = array();
 			$display_notice = false;
 
 			$post_unread = (isset($topic_tracking_info[$forum_id][$topic_id]) && $row['post_time'] > $topic_tracking_info[$forum_id][$topic_id]) ? true : false;
@@ -423,31 +426,16 @@ class newspage
 			$row['post_text'] = $message;
 
 			// Edit Information
-			if (($row['post_edit_count'] && $this->config['display_last_edited']) || $row['post_edit_reason'])
+			if ($this->shows_edit_notice($row))
 			{
-				// Get usernames for all following posts if not already stored
-				if (!sizeof($post_edit_list) && ($row['post_edit_reason'] || ($row['post_edit_user'] && !isset($user_cache[$row['post_edit_user']]))))
-				{
-					$sql2 = 'SELECT DISTINCT u.user_id, u.username, u.user_colour
-						FROM ' . POSTS_TABLE . ' p, ' . USERS_TABLE . ' u
-						WHERE p.post_edit_count <> 0
-							AND p.post_edit_user <> 0
-							AND p.post_edit_user = u.user_id';
-					$result2 = $this->db->sql_query($sql2);
-					while ($user_edit_row = $this->db->sql_fetchrow($result2))
-					{
-						$post_edit_list[$user_edit_row['user_id']] = $user_edit_row;
-					}
-					$this->db->sql_freeresult($result2);
-				}
-
-				if (!$row['post_edit_user'] || $row['post_edit_user'] == $poster_id)
+				$editor_id = (int) $row['post_edit_user'];
+				if (!$editor_id || $editor_id == $poster_id || !isset($editors[$editor_id]))
 				{
 					$display_username = get_username_string('full', $poster_id, $row['username'], $row['user_colour'], $row['post_username']);
 				}
 				else
 				{
-					$display_username = get_username_string('full', $row['post_edit_user'], $post_edit_list[$row['post_edit_user']]['username'], $post_edit_list[$row['post_edit_user']]['user_colour']);
+					$display_username = get_username_string('full', $editor_id, $editors[$editor_id]['username'], $editors[$editor_id]['user_colour']);
 				}
 
 				$l_edited_by = $this->user->lang('EDITED_TIMES_TOTAL', (int) $row['post_edit_count'], $display_username, $this->user->format_date($row['post_edit_time'], false, true));
@@ -465,52 +453,19 @@ class newspage
 			$row['rank_image'] = $rank_data['img'];
 			$row['rank_image_src'] = $rank_data['img_src'];
 
-			// phpBB 4.0 has no Jabber field, so the column may be missing
-			$row['user_jabber'] = (!empty($row['user_jabber']) && $this->auth->acl_get('u_sendim')) ? append_sid("{$this->root_path}memberlist.{$this->php_ext}", "mode=contact&amp;action=jabber&amp;u=$poster_id") : '';
+			$comments = $this->content_visibility->get_count('topic_posts', $row, $forum_id) - 1;
 
-			// Can this user receive a Private Message?
-			$can_receive_pm = (
-				// They must be a "normal" user
-				$row['user_type'] != USER_IGNORE &&
-
-				// They must not be deactivated by the administrator
-				($row['user_type'] != USER_INACTIVE || $row['user_inactive_reason'] != INACTIVE_MANUAL) &&
-
-				// They must be able to read PMs
-				//@todo in_array($poster_id, $can_receive_pm_list) &&
-
-				// They must not be permanently banned
-				//@todo !in_array($poster_id, $permanently_banned_users) &&
-
-				// They must allow users to contact via PM
-				(($this->auth->acl_gets('a_', 'm_') || $this->auth->acl_getf_global('m_')) || $row['user_allow_pm'])
-			);
-
-			$u_pm = $u_email = '';
-
-			if ($this->config['allow_privmsg'] && $this->auth->acl_get('u_sendpm') && $can_receive_pm)
-			{
-				$u_pm = append_sid("{$this->root_path}ucp.{$this->php_ext}", 'i=pm&amp;mode=compose&amp;action=quotepost&amp;p=' . $row['post_id']);
-			}
-
-			if ((!empty($row['user_allow_viewemail']) && $this->auth->acl_get('u_sendemail')) || $this->auth->acl_get('a_email'))
-			{
-				$u_email = ($this->config['board_email_form'] && $this->config['email_enable']) ? append_sid("{$this->root_path}memberlist.{$this->php_ext}", "mode=email&amp;u=$poster_id") : (($this->config['board_hide_emails'] && !$this->auth->acl_get('a_email')) ? '' : 'mailto:' . $row['user_email']);
-			}
+			// Forum names are stored HTML-escaped
+			$forum_name = isset($row['forum_name']) ? $row['forum_name'] : '';
+			$u_forum = append_sid("{$this->root_path}viewforum.{$this->php_ext}", 'f=' . $forum_id);
 
 			$this->template->assign_block_vars('postrow', array(
 				'POST_ID'				=> $post_id,
-				'S_IGNORE_POST'			=> false,
-				'L_IGNORE_POST'			=> '',
-				'ONLINE_IMG'			=> ($poster_id == ANONYMOUS || !$this->config['load_onlinetrack']) ? '' : ((in_array($poster_id, $user_online_tracking_info)) ? $this->user->img('icon_user_online', 'ONLINE') : $this->user->img('icon_user_offline', 'OFFLINE')),
-				'S_ONLINE'				=> ($poster_id == ANONYMOUS || !$this->config['load_onlinetrack']) ? false : ((in_array($poster_id, $user_online_tracking_info)) ? true : false),
-
 				'U_EDIT'				=> (!$this->user->data['is_registered']) ? '' : ((($this->user->data['user_id'] == $row['poster_id'] && $this->auth->acl_get('f_edit', $forum_id) && ($row['post_time'] > time() - ($this->config['edit_time'] * 60) || !$this->config['edit_time'])) || $this->auth->acl_get('m_edit', $forum_id)) ? append_sid("{$this->root_path}posting.{$this->php_ext}", "mode=edit&amp;f=$forum_id&amp;p={$row['post_id']}") : ''),
 				'U_QUOTE'				=> ($this->auth->acl_get('f_reply', $forum_id)) ? append_sid("{$this->root_path}posting.{$this->php_ext}", "mode=quote&amp;f=$forum_id&amp;p={$row['post_id']}") : '',
 				'U_INFO'				=> ($this->auth->acl_get('m_info', $forum_id)) ? append_sid("{$this->root_path}mcp.{$this->php_ext}", "i=main&amp;mode=post_details&amp;f=$forum_id&amp;p=" . $row['post_id'], true, $this->user->session_id) : '',
 				'U_DELETE'				=> (!$this->user->data['is_registered']) ? '' : ((($this->user->data['user_id'] == $row['poster_id'] && $this->auth->acl_get('f_delete', $forum_id) && $row['topic_last_post_id'] == $row['post_id'] && ($row['post_time'] > time() - ($this->config['edit_time'] * 60) || !$this->config['edit_time'])) || $this->auth->acl_get('m_delete', $forum_id)) ? append_sid("{$this->root_path}posting.{$this->php_ext}", "mode=delete&amp;f=$forum_id&amp;p={$row['post_id']}") : ''),
 				'U_REPORT'				=> ($this->auth->acl_get('f_report', $forum_id)) ? append_sid("{$this->root_path}report.{$this->php_ext}", 'f=' . $forum_id . '&amp;p=' . $row['post_id']) : '',
-				'U_NOTES'				=> ($this->auth->acl_getf_global('m_')) ? append_sid("{$this->root_path}mcp.{$this->php_ext}", 'i=notes&amp;mode=user_notes&amp;u=' . $poster_id, true, $this->user->session_id) : '',
 				'U_WARN'				=> ($this->auth->acl_get('m_warn') && $poster_id != $this->user->data['user_id'] && $poster_id != ANONYMOUS) ? append_sid("{$this->root_path}mcp.{$this->php_ext}", 'i=warn&amp;mode=warn_post&amp;f=' . $forum_id . '&amp;p=' . $post_id, true, $this->user->session_id) : '',
 				'U_NEWS'				=> $this->helper->route('phpbbmodders_newspage_singlenews_controller', array('topic_id' => $topic_id)),
 
@@ -519,16 +474,12 @@ class newspage
 				'POST_ICON_IMG_HEIGHT'	=> (!empty($row['icon_id'])) ? $icons[$row['icon_id']]['height'] : '',
 				'U_MINI_POST'			=> append_sid("{$this->root_path}viewtopic.{$this->php_ext}", 'p=' . $row['post_id']) . (($row['topic_type'] == POST_GLOBAL) ? '&amp;f=' . $forum_id : '') . '#p' . $row['post_id'],
 				'POST_SUBJECT'			=> htmlspecialchars(censor_text($row['post_subject']), ENT_QUOTES, 'UTF-8', false),
-				'MINI_POST_IMG'			=> ($post_unread) ? $this->user->img('icon_post_target_unread', 'NEW_POST') : $this->user->img('icon_post_target', 'POST'),
-				'MINI_POST'				=> ($post_unread) ? $this->user->lang['UNREAD_POST'] : $this->user->lang['POST'],
 				'S_UNREAD_POST'			=> $post_unread,
 				'POST_AUTHOR_FULL'		=> get_username_string('full', $poster_id, $row['username'], $row['user_colour'], $row['post_username']),
 				'POST_DATE'				=> $this->user->format_date($row['post_time']),
 
-				'S_POST_UNAPPROVED'		=> $row['post_visibility'] == ITEM_UNAPPROVED,
 				'S_POST_REPORTED'		=> ($row['post_reported'] && $this->auth->acl_get('m_report', $forum_id)) ? true : false,
 				'U_MCP_REPORT'			=> ($this->auth->acl_get('m_report', $forum_id)) ? append_sid("{$this->root_path}mcp.{$this->php_ext}", 'i=reports&amp;mode=report_details&amp;f=' . $forum_id . '&amp;p=' . $row['post_id'], true, $this->user->session_id) : '',
-				'U_MCP_APPROVE'			=> ($this->auth->acl_get('m_approve', $forum_id)) ? append_sid("{$this->root_path}mcp.{$this->php_ext}", 'i=queue&amp;mode=approve_details&amp;f=' . $forum_id . '&amp;p=' . $row['post_id'], true, $this->user->session_id) : '',
 
 				'MESSAGE'				=> $row['post_text'],
 
@@ -539,14 +490,15 @@ class newspage
 				'EDITED_MESSAGE'		=> $l_edited_by,
 				'EDIT_REASON'			=> htmlspecialchars($row['post_edit_reason'], ENT_QUOTES, 'UTF-8', false),
 				'SIGNATURE'				=> ($row['enable_sig']) ? $row['user_sig'] : '',
-				'NEWS_COMMENTS'			=> $this->content_visibility->get_count('topic_posts', $row, $forum_id) - 1,
-				'NEWS_COMMENTS_TEXT'	=> $this->user->lang('NEWS_COMMENTS_COUNT', $this->content_visibility->get_count('topic_posts', $row, $forum_id) - 1),
+				'NEWS_COMMENTS'			=> $comments,
+				'NEWS_COMMENTS_TEXT'	=> $this->user->lang('NEWS_COMMENTS_COUNT', $comments),
 				'S_NEWS_SHORTENED'		=> $shortened,
 				'U_NEWS_REPLY'			=> ($this->auth->acl_get('f_reply', $forum_id) && ($row['topic_status'] != ITEM_LOCKED || $this->auth->acl_get('m_edit', $forum_id))) ? append_sid("{$this->root_path}posting.{$this->php_ext}", "mode=reply&amp;t=$topic_id") : '',
 				'NEWS_LEAD_IMAGE_SRC'	=> utf8_htmlspecialchars($lead_image['src']),
 				'NEWS_LEAD_IMAGE_ALT'	=> utf8_htmlspecialchars($lead_image['alt']),
-				'NEWS_FORUM_NAME'		=> isset($row['forum_name']) ? $row['forum_name'] : '',
-				'U_NEWS_FORUM'			=> append_sid("{$this->root_path}viewforum.{$this->php_ext}", 'f=' . $forum_id),
+				'NEWS_FORUM_NAME'		=> $forum_name,
+				'U_NEWS_FORUM'			=> $u_forum,
+				'NEWS_IN_FORUM'			=> ($forum_name !== '') ? $this->user->lang('NEWS_IN_FORUM', '<a href="' . $u_forum . '">' . $forum_name . '</a>') : '',
 
 				'POSTER_AVATAR'			=> ($this->user->optionget('viewavatars')) ? $this->get_poster_avatar($row) : '',
 				'U_POST_AUTHOR'			=> get_username_string('profile', $poster_id, $row['username'], $row['user_colour'], $row['post_username']),
@@ -554,58 +506,15 @@ class newspage
 				'RANK_IMG'				=> $row['rank_image'],
 				'RANK_IMG_SRC'			=> $row['rank_image_src'],
 				'POSTER_POSTS'			=> $row['user_posts'],
-				'POSTER_JOINED'			=> $this->user->format_date($row['user_regdate']),
 				'U_SEARCH'				=> $this->auth->acl_get('u_search') ? append_sid("{$this->root_path}search.{$this->php_ext}", 'author_id=' . $poster_id . '&amp;sr=posts') : '',
-
-				'U_PM'					=> $u_pm,
-				'U_EMAIL'				=> $u_email,
-				'U_JABBER'				=> $row['user_jabber'],
 			));
 
-			$contact_fields = array(
-				array(
-					'ID'		=> 'pm',
-					'NAME' 		=> $this->user->lang['PRIVATE_MESSAGES'],
-					'U_CONTACT'	=> $u_pm,
-				),
-				array(
-					'ID'		=> 'email',
-					'NAME'		=> $this->user->lang['SEND_EMAIL'],
-					'U_CONTACT'	=> $u_email,
-				),
-			);
-
-			if ($row['user_jabber'])
+			if (!empty($profile_fields[$poster_id]))
 			{
-				$contact_fields[] = array(
-					'ID'		=> 'jabber',
-					'NAME'		=> $this->user->lang['JABBER'],
-					'U_CONTACT'	=> $row['user_jabber'],
-				);
-			}
-
-			foreach ($contact_fields as $field)
-			{
-				if ($field['U_CONTACT'])
-				{
-					$this->template->assign_block_vars('postrow.contact', $field);
-				}
-			}
-
-			if (!empty($cp_row['blockrow']))
-			{
+				$cp_row = $this->profile_fields->generate_profile_fields_template_data($profile_fields[$poster_id], false);
 				foreach ($cp_row['blockrow'] as $field_data)
 				{
 					$this->template->assign_block_vars('postrow.custom_fields', $field_data);
-
-					if ($field_data['S_PROFILE_CONTACT'])
-					{
-						$this->template->assign_block_vars('postrow.contact', array(
-							'ID'		=> $field_data['PROFILE_FIELD_IDENT'],
-							'NAME'		=> $field_data['PROFILE_FIELD_NAME'],
-							'U_CONTACT'	=> $field_data['PROFILE_FIELD_CONTACT'],
-						));
-					}
 				}
 			}
 
@@ -620,13 +529,11 @@ class newspage
 				}
 			}
 		}
-		$this->db->sql_freeresult($result);
 
 		// Specify some images
 		$this->template->assign_vars(array(
 			'NEWS_USER_INFO'			=> (bool) $this->config['news_user_info'],
 			'NEWS_POST_BUTTONS'			=> (bool) $this->config['news_post_buttons'],
-			'S_NEWS_ARCHIVE_PER_YEAR'	=> $this->config['news_archive_show'] == self::ARCHIVE_PER_YEAR,
 
 			'NEWS_ONLY'					=> $this->news,
 			'NEWS_TITLE'				=> $this->get_page_title(),
@@ -636,26 +543,80 @@ class newspage
 	}
 
 	/**
-	 * @param array $posters
-	 * @return array
+	 * Whether a post shows the "last edited by" notice, as viewtopic.php decides it.
+	 *
+	 * @param array $row Post row
+	 * @return bool
 	 */
-	public function get_online_posters(array $posters)
+	protected function shows_edit_notice(array $row)
 	{
-		$users = array();
-		$sql = 'SELECT session_user_id
-			FROM ' . SESSIONS_TABLE . '
-			WHERE ' . $this->db->sql_in_set('session_user_id', $posters) . '
-				AND session_user_id <> ' . ANONYMOUS . '
-				AND session_viewonline = 1';
-		$result = $this->db->sql_query($sql);
+		return ($row['post_edit_count'] && $this->config['display_last_edited']) || $row['post_edit_reason'];
+	}
 
+	/**
+	 * Names and colours of the users who last edited the shown posts, when that
+	 * was not the poster, in one query.
+	 *
+	 * @param array $rows Post rows
+	 * @return array User rows keyed by user ID
+	 */
+	protected function get_editors(array $rows)
+	{
+		$editor_ids = array();
+		foreach ($rows as $row)
+		{
+			if ($this->shows_edit_notice($row) && $row['post_edit_user'] && $row['post_edit_user'] != $row['poster_id'])
+			{
+				$editor_ids[] = (int) $row['post_edit_user'];
+			}
+		}
+
+		$editors = array();
+		if (empty($editor_ids))
+		{
+			return $editors;
+		}
+
+		$sql = 'SELECT user_id, username, user_colour
+			FROM ' . USERS_TABLE . '
+			WHERE ' . $this->db->sql_in_set('user_id', array_unique($editor_ids));
+		$result = $this->db->sql_query($sql);
 		while ($row = $this->db->sql_fetchrow($result))
 		{
-			$users[] = $row['session_user_id'];
+			$editors[(int) $row['user_id']] = $row;
 		}
 		$this->db->sql_freeresult($result);
 
-		return $users;
+		return $editors;
+	}
+
+	/**
+	 * The posters' profile fields that are set to show on topic pages, as viewtopic.php
+	 * picks them.
+	 *
+	 * @param int[] $poster_ids
+	 * @return array Profile fields keyed by user ID, then by field name
+	 */
+	protected function get_profile_fields(array $poster_ids)
+	{
+		if (empty($poster_ids) || !$this->config['load_cpf_viewtopic'])
+		{
+			return array();
+		}
+
+		$profile_fields = array();
+		foreach ($this->profile_fields->grab_profile_fields_data(array_unique($poster_ids)) as $user_id => $fields)
+		{
+			foreach ($fields as $ident => $field)
+			{
+				if ($field['data']['field_show_on_vt'])
+				{
+					$profile_fields[$user_id][$ident] = $field;
+				}
+			}
+		}
+
+		return $profile_fields;
 	}
 
 	/**
