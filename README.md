@@ -7,10 +7,12 @@ A news page that shows the latest topics from chosen forums, shortened to a set 
 ## Features
 
 - A **News** page at `/news`, linked from the board's navigation bar with an icon you choose.
-- Shows the first post of the newest topics in the forums you pick, with a set number of news per page and pages.
-- Shortens long news to a set number of characters, with a "Read full news" link. Formatting is kept and no tag is cut in half.
-- Visitors can filter the news by forum and by month, and open a single news item.
-- Optional poster information (avatar, rank, profile fields), post buttons, attachments and moved topics.
+- Shows the first post of the newest topics in the forums you pick, as news cards: title, a byline with author, date and forum, the text, and one line with "Read more", the comment count and "View topic".
+- Shortens long news to a set number of characters, with "Read more" only when the text was cut. Formatting is kept and no tag is cut in half.
+- Optionally shows each post's first image above its text, from the text or its attachments.
+- Visitors can filter the news by forum and by month; the active filters show under the filter bar and can be removed one at a time.
+- A single news item has its own page, with a link back to all news and "Reply" for readers who may reply.
+- Optional poster information (avatar, rank, post count, profile fields), post buttons, attachments and moved topics.
 - Shows in **Who is online** when someone is reading the news.
 - Settings under **ACP → Extensions → Newspage**.
 
