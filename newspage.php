@@ -462,6 +462,8 @@ class newspage
 				'U_MINI_POST'			=> append_sid("{$this->root_path}viewtopic.{$this->php_ext}", 'p=' . $row['post_id']) . (($row['topic_type'] == POST_GLOBAL) ? '&amp;f=' . $forum_id : '') . '#p' . $row['post_id'],
 				'POST_SUBJECT'			=> htmlspecialchars(censor_text($row['post_subject']), ENT_QUOTES, 'UTF-8', false),
 				'MINI_POST_IMG'			=> ($post_unread) ? $this->user->img('icon_post_target_unread', 'NEW_POST') : $this->user->img('icon_post_target', 'POST'),
+				'MINI_POST'				=> ($post_unread) ? $this->user->lang['UNREAD_POST'] : $this->user->lang['POST'],
+				'S_UNREAD_POST'			=> $post_unread,
 				'POST_AUTHOR_FULL'		=> get_username_string('full', $poster_id, $row['username'], $row['user_colour'], $row['post_username']),
 				'POST_DATE'				=> $this->user->format_date($row['post_time']),
 
