@@ -53,6 +53,19 @@
 	width: 24px;
 }
 
+.newspage-lead-image {
+	display: block;
+	margin: 4px 0 10px;
+}
+
+.newspage-lead-image img {
+	border-radius: 5px;
+	display: block;
+	max-height: 320px;
+	max-width: 100%;
+	object-fit: cover;
+}
+
 .newspage-item .content {
 	font-size: 1.3em;
 	line-height: 1.5;

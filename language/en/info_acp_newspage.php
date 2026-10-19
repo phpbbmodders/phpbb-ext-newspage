@@ -25,5 +25,7 @@ $lang = array_merge($lang, array(
 	'LOG_NEWSPAGE_SETTINGS' => '<strong>Changed Newspage settings</strong>',
 	'NEWS_ICON' => 'News navigation icon',
 	'NEWS_ICON_EXPLAIN' => 'Font Awesome icon class, for example fa-bullhorn or fa-rss. phpBB 3.3 uses Font Awesome 4.7 and phpBB 4.0 uses Font Awesome 6, so choose a name both have.',
+	'NEWS_LEAD_IMAGE' => 'Show the first image above the news',
+	'NEWS_LEAD_IMAGE_EXPLAIN' => 'Shows the first image of each news post, from the text or its attachments, above the text, and takes it out of the text. A single news item still shows the whole post.',
 	'NEWS_ICON_INVALID' => 'Enter a Font Awesome icon class in the format fa-bullhorn.',
 ));
