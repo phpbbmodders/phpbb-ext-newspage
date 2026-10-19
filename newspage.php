@@ -159,6 +159,38 @@ class newspage
 	}
 
 	/**
+	 * Take a post's first image out of its text, or else out of its attachment list.
+	 *
+	 * @param string   $message     Rendered post text, attachments filled in
+	 * @param string[] $attachments Rendered attachments not shown in the text
+	 * @return array 'html' and 'attachments' without the image; 'src' and 'alt' of the
+	 *               image, both '' when the post has none
+	 */
+	protected function take_lead_image($message, array $attachments)
+	{
+		$lead_image = new lead_image();
+		$taken = $lead_image->take($message);
+		$taken['attachments'] = $attachments;
+
+		if ($taken['src'] === '')
+		{
+			foreach ($attachments as $key => $attachment)
+			{
+				$from_attachment = $lead_image->take($attachment);
+				if ($from_attachment['src'] !== '')
+				{
+					$taken['src'] = $from_attachment['src'];
+					$taken['alt'] = $from_attachment['alt'];
+					unset($taken['attachments'][$key]);
+					break;
+				}
+			}
+		}
+
+		return $taken;
+	}
+
+	/**
 	 * @return string
 	 */
 	public function get_page_title()
@@ -309,9 +341,13 @@ class newspage
 		}
 
 		$sql_array = array(
-			'SELECT'	=> 't.*, p.*, u.*',
+			'SELECT'	=> 't.*, p.*, u.*, f.forum_name',
 			'FROM'		=> array(TOPICS_TABLE => 't'),
 			'LEFT_JOIN'	=> array(
+				array(
+					'FROM'	=> array(FORUMS_TABLE => 'f'),
+					'ON'	=> 'f.forum_id = t.forum_id',
+				),
 				array(
 					'FROM'	=> array(POSTS_TABLE => 'p'),
 					'ON'	=> 'p.post_id = t.topic_first_post_id',
@@ -347,17 +383,39 @@ class newspage
 
 			$parse_flags = ($row['enable_bbcode'] ? OPTION_FLAG_BBCODE : 0) | ($row['enable_smilies'] ? OPTION_FLAG_SMILIES : 0) | ($row['enable_magic_url'] ? OPTION_FLAG_LINKS : 0);
 			$message = generate_text_for_display($row['post_text'], $row['bbcode_uid'], $row['bbcode_bitfield'], $parse_flags, true);
+			// The first image is shown above the text on the news list, if the board wants it.
+			// Attachments are filled in first, so an image attachment can be that image.
+			$lead_image = array('src' => '', 'alt' => '');
+			$attachments_parsed = false;
+			if (!$this->news && !empty($this->config['news_lead_image']))
+			{
+				if ($this->auth->acl_get('f_download', $forum_id) && !empty($attachments[$post_id]))
+				{
+					parse_attachments($forum_id, $message, $attachments[$post_id], $update_count);
+					$attachments_parsed = true;
+				}
+				$lead_image = $this->take_lead_image($message, $attachments_parsed ? $attachments[$post_id] : array());
+				$message = $lead_image['html'];
+				if ($attachments_parsed)
+				{
+					$attachments[$post_id] = $lead_image['attachments'];
+				}
+			}
+
+			$shortened = false;
 			if (!$this->news && (int) $this->config['news_char_limit'] > 0)
 			{
 				$trimmer = new message_trimmer();
+				$full_message = $message;
 				$message = $trimmer->trim($message, (int) $this->config['news_char_limit']);
+				$shortened = $message !== $full_message;
 			}
 
 			if (!$this->auth->acl_get('f_download', $forum_id))
 			{
 				$display_notice = true;
 			}
-			else if (!empty($attachments[$post_id]))
+			else if (!$attachments_parsed && !empty($attachments[$post_id]))
 			{
 				parse_attachments($forum_id, $message, $attachments[$post_id], $update_count);
 			}
@@ -482,6 +540,13 @@ class newspage
 				'EDIT_REASON'			=> htmlspecialchars($row['post_edit_reason'], ENT_QUOTES, 'UTF-8', false),
 				'SIGNATURE'				=> ($row['enable_sig']) ? $row['user_sig'] : '',
 				'NEWS_COMMENTS'			=> $this->content_visibility->get_count('topic_posts', $row, $forum_id) - 1,
+				'NEWS_COMMENTS_TEXT'	=> $this->user->lang('NEWS_COMMENTS_COUNT', $this->content_visibility->get_count('topic_posts', $row, $forum_id) - 1),
+				'S_NEWS_SHORTENED'		=> $shortened,
+				'U_NEWS_REPLY'			=> ($this->auth->acl_get('f_reply', $forum_id) && ($row['topic_status'] != ITEM_LOCKED || $this->auth->acl_get('m_edit', $forum_id))) ? append_sid("{$this->root_path}posting.{$this->php_ext}", "mode=reply&amp;t=$topic_id") : '',
+				'NEWS_LEAD_IMAGE_SRC'	=> utf8_htmlspecialchars($lead_image['src']),
+				'NEWS_LEAD_IMAGE_ALT'	=> utf8_htmlspecialchars($lead_image['alt']),
+				'NEWS_FORUM_NAME'		=> isset($row['forum_name']) ? $row['forum_name'] : '',
+				'U_NEWS_FORUM'			=> append_sid("{$this->root_path}viewforum.{$this->php_ext}", 'f=' . $forum_id),
 
 				'POSTER_AVATAR'			=> ($this->user->optionget('viewavatars')) ? $this->get_poster_avatar($row) : '',
 				'U_POST_AUTHOR'			=> get_username_string('profile', $poster_id, $row['username'], $row['user_colour'], $row['post_username']),

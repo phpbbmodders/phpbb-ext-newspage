@@ -41,6 +41,7 @@ class settings_test extends \PHPUnit\Framework\TestCase
 					'news_attach_show'	=> false,
 					'news_cat_show'		=> true,
 					'news_archive_show'	=> true,
+					'news_lead_image'	=> true,
 				),
 				array(
 					'news_char_limit'	=> 250,
@@ -53,6 +54,7 @@ class settings_test extends \PHPUnit\Framework\TestCase
 					'news_attach_show'	=> false,
 					'news_cat_show'		=> true,
 					'news_archive_show'	=> true,
+					'news_lead_image'	=> true,
 				),
 			),
 			'limits are applied' => array(

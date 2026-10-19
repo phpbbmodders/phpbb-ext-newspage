@@ -63,6 +63,7 @@ class main_module
 			'SETTING_NEWS_USER_INFO' => (bool) $config['news_user_info'],
 			'SETTING_NEWS_POST_BUTTONS' => (bool) $config['news_post_buttons'],
 			'SETTING_NEWS_ATTACH_SHOW' => (bool) $config['news_attach_show'],
+			'SETTING_NEWS_LEAD_IMAGE' => !empty($config['news_lead_image']),
 		));
 	}
 }

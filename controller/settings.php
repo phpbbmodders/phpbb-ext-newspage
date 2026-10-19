@@ -74,5 +74,6 @@ class settings
 		$this->config->set('news_attach_show',	$this->request->variable('news_attach_show', false));
 		$this->config->set('news_cat_show',		$this->request->variable('news_cat_show', false));
 		$this->config->set('news_archive_show',	$this->request->variable('news_archive_show', false));
+		$this->config->set('news_lead_image',	$this->request->variable('news_lead_image', false));
 	}
 }
