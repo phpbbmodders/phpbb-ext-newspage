@@ -1,32 +1,32 @@
-<!-- IF .cat_block -->
+{% if loops.cat_block|length %}
 <div class="dropdown-container dropdown-button-control newspage-dropdown">
-	<span title="{L_NEWS_FILTER_BY_CATEGORY}" class="button dropdown-trigger dropdown-select newspage-filter<!-- IF NEWS_FILTER_CATEGORY --> newspage-filter-active<!-- ENDIF -->">
-		<span><!-- IF NEWS_FILTER_CATEGORY -->{NEWS_FILTER_CATEGORY}<!-- ELSE -->{L_NEWS_FILTER_CATEGORY}<!-- ENDIF --></span>
+	<span title="{{ lang('NEWS_FILTER_BY_CATEGORY')|e('html_attr') }}" class="button dropdown-trigger dropdown-select newspage-filter{% if NEWS_FILTER_CATEGORY %} newspage-filter-active{% endif %}">
+		<span>{% if NEWS_FILTER_CATEGORY %}{{ NEWS_FILTER_CATEGORY }}{% else %}{{ lang('NEWS_FILTER_CATEGORY') }}{% endif %}</span>
 		<i class="icon fa-caret-down fas fa-fw" aria-hidden="true"></i>
 	</span>
 	<div class="dropdown hidden">
 		<div class="pointer"><div class="pointer-inner"></div></div>
 		<ul class="dropdown-contents">
 			<li>
-				<strong>{L_NEWS_CAT}</strong>
-				<!-- IF U_REMOVE_CATEGORY_FILTER -->
-					<a href="{U_REMOVE_CATEGORY_FILTER}" class="newspage-remove">{L_NEWS_FILTER_REMOVE}</a>
-				<!-- ENDIF -->
+				<strong>{{ lang('NEWS_CAT') }}</strong>
+				{% if U_REMOVE_CATEGORY_FILTER %}
+					<a href="{{ U_REMOVE_CATEGORY_FILTER }}" class="newspage-remove">{{ lang('NEWS_FILTER_REMOVE') }}</a>
+				{% endif %}
 			</li>
-			<!-- BEGIN cat_block -->
+			{% for cat_block in loops.cat_block %}
 			<li>
-				<a href="{cat_block.U_NEWS_CAT}" class="newspage-option">
-					<!-- IF cat_block.S_SELECTED --><strong><!-- ENDIF -->
-					{cat_block.NEWS_CAT}
-					<!-- IF cat_block.S_SELECTED --></strong><!-- ENDIF -->
+				<a href="{{ cat_block.U_NEWS_CAT }}" class="newspage-option">
+					{% if cat_block.S_SELECTED %}<strong>{% endif %}
+					{{ cat_block.NEWS_CAT }}
+					{% if cat_block.S_SELECTED %}</strong>{% endif %}
 				</a>
-				<span class="newspage-count">{cat_block.NEWS_COUNT}</span>
-				<!-- IF cat_block.U_POST_NEWS -->
-					<a href="{cat_block.U_POST_NEWS}" class="newspage-add" title="{L_NEWS_ADD_NEW_TITLE}">{L_NEWS_ADD_NEW}</a>
-				<!-- ENDIF -->
+				<span class="newspage-count">{{ cat_block.NEWS_COUNT }}</span>
+				{% if cat_block.U_POST_NEWS %}
+					<a href="{{ cat_block.U_POST_NEWS }}" class="newspage-add" title="{{ lang('NEWS_ADD_NEW_TITLE')|e('html_attr') }}">{{ lang('NEWS_ADD_NEW') }}</a>
+				{% endif %}
 			</li>
-			<!-- END cat_block -->
+			{% endfor %}
 		</ul>
 	</div>
 </div>
-<!-- ENDIF -->
+{% endif %}

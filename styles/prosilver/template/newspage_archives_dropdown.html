@@ -1,32 +1,32 @@
-<!-- IF .archive_block -->
+{% if loops.archive_block|length %}
 <div class="dropdown-container dropdown-button-control newspage-dropdown">
-	<span title="{L_NEWS_FILTER_BY_ARCHIVE}" class="button dropdown-trigger dropdown-select newspage-filter<!-- IF NEWS_FILTER_ARCHIVE_YEAR --> newspage-filter-active<!-- ENDIF -->">
-		<span><!-- IF NEWS_FILTER_ARCHIVE_YEAR -->{NEWS_FILTER_ARCHIVE_MONTH} {NEWS_FILTER_ARCHIVE_YEAR}<!-- ELSE -->{L_NEWS_FILTER_ARCHIVE}<!-- ENDIF --></span>
+	<span title="{{ lang('NEWS_FILTER_BY_ARCHIVE')|e('html_attr') }}" class="button dropdown-trigger dropdown-select newspage-filter{% if NEWS_FILTER_ARCHIVE_YEAR %} newspage-filter-active{% endif %}">
+		<span>{% if NEWS_FILTER_ARCHIVE_YEAR %}{{ NEWS_FILTER_ARCHIVE_MONTH }} {{ NEWS_FILTER_ARCHIVE_YEAR }}{% else %}{{ lang('NEWS_FILTER_ARCHIVE') }}{% endif %}</span>
 		<i class="icon fa-caret-down fas fa-fw" aria-hidden="true"></i>
 	</span>
 	<div class="dropdown hidden">
 		<div class="pointer"><div class="pointer-inner"></div></div>
 		<ul class="dropdown-contents">
 			<li>
-				<strong>{L_NEWS_ARCHIVE}</strong>
-				<!-- IF U_REMOVE_ARCHIVE_FILTER -->
-					<a href="{U_REMOVE_ARCHIVE_FILTER}" class="newspage-remove">{L_NEWS_FILTER_REMOVE}</a>
-				<!-- ENDIF -->
+				<strong>{{ lang('NEWS_ARCHIVE') }}</strong>
+				{% if U_REMOVE_ARCHIVE_FILTER %}
+					<a href="{{ U_REMOVE_ARCHIVE_FILTER }}" class="newspage-remove">{{ lang('NEWS_FILTER_REMOVE') }}</a>
+				{% endif %}
 			</li>
-			<!-- BEGIN archive_block -->
-			<li><strong>{archive_block.NEWS_YEAR}</strong></li>
-			<!-- BEGIN archive_row -->
+			{% for archive_block in loops.archive_block %}
+			<li><strong>{{ archive_block.NEWS_YEAR }}</strong></li>
+			{% for archive_row in archive_block.archive_row %}
 				<li>
-					<a href="{archive_block.archive_row.U_NEWS_MONTH}" class="newspage-option">
-						<!-- IF archive_block.archive_row.S_SELECTED --><strong><!-- ENDIF -->
-						{archive_block.archive_row.NEWS_MONTH}
-						<!-- IF archive_block.archive_row.S_SELECTED --></strong><!-- ENDIF -->
+					<a href="{{ archive_row.U_NEWS_MONTH }}" class="newspage-option">
+						{% if archive_row.S_SELECTED %}<strong>{% endif %}
+						{{ archive_row.NEWS_MONTH }}
+						{% if archive_row.S_SELECTED %}</strong>{% endif %}
 					</a>
-					<span class="newspage-count">{archive_block.archive_row.NEWS_COUNT}</span>
+					<span class="newspage-count">{{ archive_row.NEWS_COUNT }}</span>
 				</li>
-			<!-- END archive_row -->
-			<!-- END archive_block -->
+			{% endfor %}
+			{% endfor %}
 		</ul>
 	</div>
 </div>
-<!-- ENDIF -->
+{% endif %}

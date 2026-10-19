@@ -59,6 +59,16 @@ class viewonline_test extends \PHPUnit\Framework\TestCase
 				return $route . '#' . serialize($params);
 			});
 
+		// Forum 40 is one the viewer may not see
+		$auth = $this->getMockBuilder('\phpbb\auth\auth')
+			->disableOriginalConstructor()
+			->getMock();
+		$auth->expects($this->any())
+			->method('acl_get')
+			->willReturnCallback(function ($option, $forum_id = 0) {
+				return $option === 'f_list' && $forum_id != 40;
+			});
+
 		/** @var \phpbb\controller\helper $controller_helper */
 		$this->listener = new viewonline_listener(
 			new helper(
@@ -69,6 +79,7 @@ class viewonline_test extends \PHPUnit\Framework\TestCase
 				))
 			),
 			$this->user,
+			$auth,
 			'php'
 		);
 	}
@@ -201,6 +212,54 @@ class viewonline_test extends \PHPUnit\Framework\TestCase
 				'$location',
 				'phpbbmodders_newspage_category_archive_controller#' . serialize(array('forum_id' => 30, 'year' => 2014, 'month' => '04')),
 				'VIEWONLINE_NEWS_CATEGORY_ARCHIVE Forum30 April 2014',
+			),
+			// A forum the viewer may not see, or one that no longer exists, is not named
+			array(
+				array(
+					1 => 'app',
+				),
+				array(
+					'session_page' => 'app.' . $phpEx . '/news/category/40'
+				),
+				array(
+					40 => array(
+						'forum_name'	=> 'Forum40',
+					),
+				),
+				'$location_url',
+				'$location',
+				'phpbbmodders_newspage_controller#a:0:{}',
+				'VIEWONLINE_NEWS',
+			),
+			array(
+				array(
+					1 => 'app',
+				),
+				array(
+					'session_page' => 'app.' . $phpEx . '/news/category/40/archive/2014/04'
+				),
+				array(
+					40 => array(
+						'forum_name'	=> 'Forum40',
+					),
+				),
+				'$location_url',
+				'$location',
+				'phpbbmodders_newspage_archive_controller#' . serialize(array('year' => 2014, 'month' => '04')),
+				'VIEWONLINE_NEWS_ARCHIVE April 2014',
+			),
+			array(
+				array(
+					1 => 'app',
+				),
+				array(
+					'session_page' => 'app.' . $phpEx . '/news/category/50'
+				),
+				array(),
+				'$location_url',
+				'$location',
+				'phpbbmodders_newspage_controller#a:0:{}',
+				'VIEWONLINE_NEWS',
 			),
 			// Other pages are left alone
 			array(

@@ -1,76 +1,76 @@
-<!-- INCLUDE overall_header.html -->
+{% include 'overall_header.html' %}
 
-<!-- EVENT nickvergessen_newspage_before -->
+{% EVENT nickvergessen_newspage_before %}
 
-<!-- IF NEWS_ONLY -->
-<!-- EVENT phpbbmodders_newspage_single_before -->
-<!-- ENDIF -->
-<!-- IF NEWS_ONLY and U_NEWSPAGE -->
-<p class="newspage-back"><a href="{U_NEWSPAGE}"><i class="icon fa-arrow-left fas fa-fw" aria-hidden="true"></i>{L_NEWS_ALL}</a></p>
-<!-- ENDIF -->
-<h2<!-- IF NEWS_ONLY --> class="newspage-single-title"<!-- ENDIF -->><!-- IF NEWS_ONLY -->{NEWS_TITLE}<!-- ELSE -->{L_NEWS}<!-- ENDIF --></h2>
-<!-- EVENT nickvergessen_newspage_title_after -->
+{% if NEWS_ONLY %}
+{% EVENT phpbbmodders_newspage_single_before %}
+{% endif %}
+{% if NEWS_ONLY and U_NEWSPAGE %}
+<p class="newspage-back"><a href="{{ U_NEWSPAGE }}"><i class="icon fa-arrow-left fas fa-fw" aria-hidden="true"></i>{{ lang('NEWS_ALL') }}</a></p>
+{% endif %}
+<h2{% if NEWS_ONLY %} class="newspage-single-title"{% endif %}>{% if NEWS_ONLY %}{{ NEWS_TITLE }}{% else %}{{ lang('NEWS') }}{% endif %}</h2>
+{% EVENT nickvergessen_newspage_title_after %}
 
-<!-- IF not NEWS_ONLY and (.archive_block or .cat_block or .pagination or TOTAL_NEWS) -->
+{% if not NEWS_ONLY and (loops.archive_block|length or loops.cat_block|length or loops.pagination|length or TOTAL_NEWS) %}
 <br />
-<!-- EVENT nickvergessen_newspage_filters_before -->
+{% EVENT nickvergessen_newspage_filters_before %}
 <div class="action-bar newspage-filters">
-	<!-- INCLUDE newspage_categories_dropdown.html -->
-	<!-- INCLUDE newspage_archives_dropdown.html -->
+	{% include 'newspage_categories_dropdown.html' %}
+	{% include 'newspage_archives_dropdown.html' %}
 
-	<!-- IF (PAGE_NUMBER and PAGINATION) or TOTAL_NEWS -->
+	{% if (PAGE_NUMBER and PAGINATION) or TOTAL_NEWS %}
 	<div class="pagination">
-		{TOTAL_NEWS} &bull;
-		<!-- IF .pagination -->
-			<!-- INCLUDE pagination.html -->
-		<!-- ELSE -->
-			{PAGE_NUMBER}
-		<!-- ENDIF -->
+		{{ TOTAL_NEWS }} &bull;
+		{% if loops.pagination|length %}
+			{% include 'pagination.html' %}
+		{% else %}
+			{{ PAGE_NUMBER }}
+		{% endif %}
 	</div>
-	<!-- ENDIF -->
+	{% endif %}
 </div>
-<!-- IF NEWS_FILTER_CATEGORY or NEWS_FILTER_ARCHIVE_YEAR -->
+{% if NEWS_FILTER_CATEGORY or NEWS_FILTER_ARCHIVE_YEAR %}
 <p class="newspage-active-filters">
-	<span>{L_NEWS_FILTER_SHOWING}{L_COLON}</span>
-	<!-- IF NEWS_FILTER_CATEGORY -->
-	<a href="{U_REMOVE_CATEGORY_FILTER}" class="newspage-chip" title="{L_NEWS_FILTER_REMOVE}">{NEWS_FILTER_CATEGORY} <i class="icon fa-times fas fa-fw" aria-hidden="true"></i><span class="sr-only">{L_NEWS_FILTER_REMOVE}</span></a>
-	<!-- ENDIF -->
-	<!-- IF NEWS_FILTER_ARCHIVE_YEAR -->
-	<a href="{U_REMOVE_ARCHIVE_FILTER}" class="newspage-chip" title="{L_NEWS_FILTER_REMOVE}">{NEWS_FILTER_ARCHIVE_MONTH} {NEWS_FILTER_ARCHIVE_YEAR} <i class="icon fa-times fas fa-fw" aria-hidden="true"></i><span class="sr-only">{L_NEWS_FILTER_REMOVE}</span></a>
-	<!-- ENDIF -->
-	<!-- IF NEWS_FILTER_CATEGORY and NEWS_FILTER_ARCHIVE_YEAR -->
-	<a href="{U_NEWSPAGE}" class="newspage-clear">{L_NEWS_FILTER_CLEAR}</a>
-	<!-- ENDIF -->
-	<!-- EVENT phpbbmodders_newspage_active_filters_append -->
+	<span>{{ lang('NEWS_FILTER_SHOWING') }}{{ lang('COLON') }}</span>
+	{% if NEWS_FILTER_CATEGORY %}
+	<a href="{{ U_REMOVE_CATEGORY_FILTER }}" class="newspage-chip" title="{{ lang('NEWS_FILTER_REMOVE')|e('html_attr') }}">{{ NEWS_FILTER_CATEGORY }} <i class="icon fa-times fas fa-fw" aria-hidden="true"></i><span class="sr-only">{{ lang('NEWS_FILTER_REMOVE') }}</span></a>
+	{% endif %}
+	{% if NEWS_FILTER_ARCHIVE_YEAR %}
+	<a href="{{ U_REMOVE_ARCHIVE_FILTER }}" class="newspage-chip" title="{{ lang('NEWS_FILTER_REMOVE')|e('html_attr') }}">{{ NEWS_FILTER_ARCHIVE_MONTH }} {{ NEWS_FILTER_ARCHIVE_YEAR }} <i class="icon fa-times fas fa-fw" aria-hidden="true"></i><span class="sr-only">{{ lang('NEWS_FILTER_REMOVE') }}</span></a>
+	{% endif %}
+	{% if NEWS_FILTER_CATEGORY and NEWS_FILTER_ARCHIVE_YEAR %}
+	<a href="{{ U_NEWSPAGE }}" class="newspage-clear">{{ lang('NEWS_FILTER_CLEAR') }}</a>
+	{% endif %}
+	{% EVENT phpbbmodders_newspage_active_filters_append %}
 </p>
-<!-- ENDIF -->
-<!-- EVENT nickvergessen_newspage_filters_after -->
-<!-- ENDIF -->
+{% endif %}
+{% EVENT nickvergessen_newspage_filters_after %}
+{% endif %}
 
-<!-- IF .postrow -->
-	<!-- INCLUDE viewtopic_postrow.html -->
-<!-- ELSE -->
+{% if loops.postrow|length %}
+	{% include 'viewtopic_postrow.html' %}
+{% else %}
 <div class="panel">
 	<div class="inner">
-		<strong>{L_NO_NEWS}</strong>
+		<strong>{{ L_NO_NEWS }}</strong>
 	</div>
 </div>
-<!-- ENDIF -->
+{% endif %}
 
-<!-- IF .pagination -->
+{% if loops.pagination|length %}
 <hr class="divider" />
 <div class="action-bar">
 	<div class="pagination">
-		{TOTAL_NEWS} &bull; <!-- INCLUDE pagination.html -->
+		{{ TOTAL_NEWS }} &bull; {% include 'pagination.html' %}
 	</div>
 </div>
 <br />
-<!-- ENDIF -->
+{% endif %}
 
-<!-- IF NEWS_ONLY -->
-<!-- EVENT phpbbmodders_newspage_single_after -->
-<!-- ENDIF -->
+{% if NEWS_ONLY %}
+{% EVENT phpbbmodders_newspage_single_after %}
+{% endif %}
 
-<!-- EVENT nickvergessen_newspage_after -->
+{% EVENT nickvergessen_newspage_after %}
 
-<!-- INCLUDE overall_footer.html -->
+{% include 'overall_footer.html' %}

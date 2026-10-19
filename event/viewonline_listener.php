@@ -40,6 +40,9 @@ class viewonline_listener implements EventSubscriberInterface
 	/* @var \phpbb\user */
 	protected $user;
 
+	/* @var \phpbb\auth\auth */
+	protected $auth;
+
 	/* @var string phpEx */
 	protected $php_ext;
 
@@ -48,12 +51,14 @@ class viewonline_listener implements EventSubscriberInterface
 	 *
 	 * @param \phpbbmodders\newspage\helper $helper
 	 * @param \phpbb\user $user
+	 * @param \phpbb\auth\auth $auth
 	 * @param string $php_ext
 	 */
-	public function __construct(\phpbbmodders\newspage\helper $helper, \phpbb\user $user, $php_ext)
+	public function __construct(\phpbbmodders\newspage\helper $helper, \phpbb\user $user, \phpbb\auth\auth $auth, $php_ext)
 	{
 		$this->helper = $helper;
 		$this->user = $user;
+		$this->auth = $auth;
 		$this->php_ext = $php_ext;
 	}
 
@@ -75,7 +80,14 @@ class viewonline_listener implements EventSubscriberInterface
 		$forum_id = $this->get_category_from_route($parts);
 		$archive = $this->get_archive_from_route($parts);
 
-		if (count($parts) === 1)
+		// Name a forum only when it exists and the viewer may see it, as viewonline.php does
+		$hidden_forum = $forum_id && (!isset($event['forum_data'][$forum_id]) || !$this->auth->acl_get('f_list', $forum_id));
+		if ($hidden_forum)
+		{
+			$forum_id = false;
+		}
+
+		if (count($parts) === 1 || ($hidden_forum && !$archive))
 		{
 			$event['location_url'] = $route->get_url();
 			$event['location'] = $this->user->lang('VIEWONLINE_NEWS');
