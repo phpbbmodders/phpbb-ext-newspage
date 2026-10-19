@@ -2,6 +2,7 @@
 	<!-- EVENT viewtopic_body_postrow_post_before -->
 	<article id="p{postrow.POST_ID}" class="newspage-item<!-- IF postrow.S_UNREAD_POST --> unreadpost<!-- ENDIF --><!-- IF postrow.S_POST_REPORTED --> reported<!-- ENDIF --><!-- IF postrow.S_POST_DELETED --> deleted<!-- ENDIF -->">
 		<header class="newspage-item-header">
+		<!-- EVENT viewtopic_body_post_buttons_list_before -->
 		<!-- IF not S_IS_BOT and NEWS_POST_BUTTONS -->
 			<!-- IF postrow.U_EDIT or postrow.U_DELETE or postrow.U_REPORT or postrow.U_WARN or postrow.U_INFO or postrow.U_QUOTE -->
 			<ul class="post-buttons">
@@ -40,8 +41,10 @@
 			</ul>
 			<!-- ENDIF -->
 		<!-- ENDIF -->
+		<!-- EVENT viewtopic_body_post_buttons_list_after -->
 
 			<!-- IF not NEWS_ONLY -->
+			<!-- EVENT viewtopic_body_post_subject_before -->
 			<h3 class="newspage-item-title"><!-- IF postrow.POST_ICON_IMG --><img src="{T_ICONS_PATH}{postrow.POST_ICON_IMG}" width="{postrow.POST_ICON_IMG_WIDTH}" height="{postrow.POST_ICON_IMG_HEIGHT}" alt="" /> <!-- ENDIF --><a href="<!-- IF NEWS_ONLY -->#p{postrow.POST_ID}<!-- ELSE -->{postrow.U_NEWS}<!-- ENDIF -->">{postrow.POST_SUBJECT}</a></h3>
 			<!-- ENDIF -->
 
@@ -61,11 +64,14 @@
 				<span class="newspage-separator" aria-hidden="true">&middot;</span>
 				<span class="newspage-forum">{{ lang('NEWS_IN_FORUM', '<a href="' ~ postrow.U_NEWS_FORUM ~ '">' ~ postrow.NEWS_FORUM_NAME ~ '</a>') }}</span>
 			<!-- ENDIF -->
+				<!-- EVENT phpbbmodders_newspage_byline_append -->
 			</p>
 
 		<!-- IF NEWS_USER_INFO -->
 			<p class="newspage-poster">
+				<!-- EVENT viewtopic_body_postrow_rank_before -->
 				<!-- IF postrow.RANK_TITLE or postrow.RANK_IMG --><span class="newspage-rank">{postrow.RANK_IMG} {postrow.RANK_TITLE}</span><!-- ENDIF -->
+				<!-- EVENT viewtopic_body_postrow_rank_after -->
 				<!-- IF postrow.POSTER_POSTS != '' --><span><strong>{L_POSTS}{L_COLON}</strong> <!-- IF postrow.U_SEARCH !== '' --><a href="{postrow.U_SEARCH}"><!-- ENDIF -->{postrow.POSTER_POSTS}<!-- IF postrow.U_SEARCH !== '' --></a><!-- ENDIF --></span><!-- ENDIF -->
 				<!-- IF postrow.POSTER_WARNINGS --><span><strong>{L_WARNINGS}{L_COLON}</strong> {postrow.POSTER_WARNINGS}</span><!-- ENDIF -->
 				<!-- EVENT viewtopic_body_postrow_custom_fields_before -->
@@ -109,9 +115,13 @@
 		<!-- ENDIF -->
 
 		<!-- IF postrow.NEWS_LEAD_IMAGE_SRC -->
+		<!-- EVENT phpbbmodders_newspage_lead_image_before -->
 		<a href="{postrow.U_NEWS}" class="newspage-lead-image"><img src="{postrow.NEWS_LEAD_IMAGE_SRC}" alt="{postrow.NEWS_LEAD_IMAGE_ALT}" loading="lazy" /></a>
+		<!-- EVENT phpbbmodders_newspage_lead_image_after -->
 		<!-- ENDIF -->
+		<!-- EVENT viewtopic_body_postrow_content_before -->
 		<div class="content">{postrow.MESSAGE}</div>
+		<!-- EVENT viewtopic_body_postrow_content_after -->
 
 		<!-- IF postrow.S_HAS_ATTACHMENTS -->
 			<dl class="attachbox">
@@ -142,10 +152,13 @@
 		<!-- ENDIF -->
 		<!-- IF postrow.BUMPED_MESSAGE --><div class="notice">{postrow.BUMPED_MESSAGE}</div><!-- ENDIF -->
 		<!-- EVENT viewtopic_body_postrow_post_notices_after -->
+		<!-- EVENT viewtopic_body_postrow_signature_before -->
 		<!-- IF NEWS_USER_INFO and postrow.SIGNATURE --><div id="sig{postrow.POST_ID}" class="signature">{postrow.SIGNATURE}</div><!-- ENDIF -->
+		<!-- EVENT viewtopic_body_postrow_signature_after -->
 
 		<!-- EVENT viewtopic_body_postrow_post_content_footer -->
 		<footer class="newspage-item-footer">
+			<!-- EVENT phpbbmodders_newspage_footer_prepend -->
 		<!-- IF not NEWS_ONLY and postrow.S_NEWS_SHORTENED -->
 			<a href="{postrow.U_NEWS}" class="newspage-read-more">{L_NEWS_READ_MORE} <i class="icon fa-arrow-right fas fa-fw" aria-hidden="true"></i></a>
 		<!-- ENDIF -->
@@ -154,7 +167,14 @@
 			<a href="{postrow.U_NEWS_REPLY}" class="newspage-reply"><i class="icon fa-reply fas fa-fw" aria-hidden="true"></i>{L_NEWS_REPLY}</a>
 		<!-- ENDIF -->
 			<a href="{postrow.U_MINI_POST}" class="newspage-view-topic">{L_NEWS_VIEW_TOPIC}</a>
-			<a href="#top" class="newspage-top top" title="{L_BACK_TO_TOP}"><i class="icon fa-chevron-circle-up fas fa-fw" aria-hidden="true"></i><span class="sr-only">{L_BACK_TO_TOP}</span></a>
+			<!-- EVENT phpbbmodders_newspage_footer_append -->
+			<!-- EVENT viewtopic_body_postrow_back2top_before -->
+			<span class="newspage-top back2top">
+				<!-- EVENT viewtopic_body_postrow_back2top_prepend -->
+				<a href="#top" class="top" title="{L_BACK_TO_TOP}"><i class="icon fa-chevron-circle-up fas fa-fw" aria-hidden="true"></i><span class="sr-only">{L_BACK_TO_TOP}</span></a>
+				<!-- EVENT viewtopic_body_postrow_back2top_append -->
+			</span>
+			<!-- EVENT viewtopic_body_postrow_back2top_after -->
 		</footer>
 	</article>
 	<!-- EVENT viewtopic_body_postrow_post_after -->

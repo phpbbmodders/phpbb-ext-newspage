@@ -106,9 +106,23 @@
 }
 
 .newspage-item-footer .newspage-top {
-	color: #8f8f8f;
+	float: none;
 	font-size: 1.3em;
 	margin-left: auto;
+}
+
+.newspage-item-footer .newspage-top a {
+	color: #8f8f8f;
+}
+
+/* prosilver floats its back-to-top link; in the footer line it sits at the end */
+.newspage-item-footer .back2top {
+	clear: none;
+}
+
+.newspage-item-footer .back2top .top {
+	float: none;
+	margin: 0;
 }
 
 @media only screen and (max-width: 700px), only screen and (max-device-width: 700px) {
