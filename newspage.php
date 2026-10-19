@@ -542,6 +542,7 @@ class newspage
 				'NEWS_COMMENTS'			=> $this->content_visibility->get_count('topic_posts', $row, $forum_id) - 1,
 				'NEWS_COMMENTS_TEXT'	=> $this->user->lang('NEWS_COMMENTS_COUNT', $this->content_visibility->get_count('topic_posts', $row, $forum_id) - 1),
 				'S_NEWS_SHORTENED'		=> $shortened,
+				'U_NEWS_REPLY'			=> ($this->auth->acl_get('f_reply', $forum_id) && ($row['topic_status'] != ITEM_LOCKED || $this->auth->acl_get('m_edit', $forum_id))) ? append_sid("{$this->root_path}posting.{$this->php_ext}", "mode=reply&amp;t=$topic_id") : '',
 				'NEWS_LEAD_IMAGE_SRC'	=> utf8_htmlspecialchars($lead_image['src']),
 				'NEWS_LEAD_IMAGE_ALT'	=> utf8_htmlspecialchars($lead_image['alt']),
 				'NEWS_FORUM_NAME'		=> isset($row['forum_name']) ? $row['forum_name'] : '',

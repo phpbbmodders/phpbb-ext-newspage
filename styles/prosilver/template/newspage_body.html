@@ -2,10 +2,13 @@
 
 <!-- EVENT nickvergessen_newspage_before -->
 
-<h2><!-- IF NEWS_ONLY -->{NEWS_TITLE}<!-- ELSE -->{L_NEWS}<!-- ENDIF --></h2>
+<!-- IF NEWS_ONLY and U_NEWSPAGE -->
+<p class="newspage-back"><a href="{U_NEWSPAGE}"><i class="icon fa-arrow-left fas fa-fw" aria-hidden="true"></i>{L_NEWS_ALL}</a></p>
+<!-- ENDIF -->
+<h2<!-- IF NEWS_ONLY --> class="newspage-single-title"<!-- ENDIF -->><!-- IF NEWS_ONLY -->{NEWS_TITLE}<!-- ELSE -->{L_NEWS}<!-- ENDIF --></h2>
 <!-- EVENT nickvergessen_newspage_title_after -->
 
-<!-- IF .archive_block or .cat_block or .pagination or TOTAL_NEWS -->
+<!-- IF not NEWS_ONLY and (.archive_block or .cat_block or .pagination or TOTAL_NEWS) -->
 <br />
 <!-- EVENT nickvergessen_newspage_filters_before -->
 <div class="action-bar newspage-filters">

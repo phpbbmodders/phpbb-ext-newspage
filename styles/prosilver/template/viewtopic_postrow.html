@@ -41,7 +41,9 @@
 			<!-- ENDIF -->
 		<!-- ENDIF -->
 
+			<!-- IF not NEWS_ONLY -->
 			<h3 class="newspage-item-title"><!-- IF postrow.POST_ICON_IMG --><img src="{T_ICONS_PATH}{postrow.POST_ICON_IMG}" width="{postrow.POST_ICON_IMG_WIDTH}" height="{postrow.POST_ICON_IMG_HEIGHT}" alt="" /> <!-- ENDIF --><a href="<!-- IF NEWS_ONLY -->#p{postrow.POST_ID}<!-- ELSE -->{postrow.U_NEWS}<!-- ENDIF -->">{postrow.POST_SUBJECT}</a></h3>
+			<!-- ENDIF -->
 
 			<!-- EVENT viewtopic_body_postrow_post_details_before -->
 			<p class="newspage-byline">
@@ -148,6 +150,9 @@
 			<a href="{postrow.U_NEWS}" class="newspage-read-more">{L_NEWS_READ_MORE} <i class="icon fa-arrow-right fas fa-fw" aria-hidden="true"></i></a>
 		<!-- ENDIF -->
 			<a href="{postrow.U_MINI_POST}" class="newspage-comments"><i class="icon fa-comment-o fa-comment far fa-fw" aria-hidden="true"></i>{postrow.NEWS_COMMENTS_TEXT}</a>
+		<!-- IF NEWS_ONLY and postrow.U_NEWS_REPLY -->
+			<a href="{postrow.U_NEWS_REPLY}" class="newspage-reply"><i class="icon fa-reply fas fa-fw" aria-hidden="true"></i>{L_NEWS_REPLY}</a>
+		<!-- ENDIF -->
 			<a href="{postrow.U_MINI_POST}" class="newspage-view-topic">{L_NEWS_VIEW_TOPIC}</a>
 			<a href="#top" class="newspage-top top" title="{L_BACK_TO_TOP}"><i class="icon fa-chevron-circle-up fas fa-fw" aria-hidden="true"></i><span class="sr-only">{L_BACK_TO_TOP}</span></a>
 		</footer>

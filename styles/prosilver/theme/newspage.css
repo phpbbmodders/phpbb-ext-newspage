@@ -196,3 +196,25 @@
 .newspage-clear {
 	margin-left: 4px;
 }
+
+/* A single news item: the page heading is its title */
+.newspage-back {
+	font-size: 1.1em;
+	margin: 0 0 4px;
+}
+
+.newspage-back .icon {
+	margin-right: 3px;
+}
+
+h2.newspage-single-title {
+	margin-bottom: 10px;
+}
+
+.newspage-reply {
+	font-weight: bold;
+}
+
+.newspage-reply .icon {
+	margin-right: 3px;
+}

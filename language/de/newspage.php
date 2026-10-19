@@ -38,6 +38,8 @@ $lang = array_merge($lang, array(
 		1	=> '%d Kommentar',
 		2	=> '%d Kommentare',
 	),
+	'NEWS_ALL'					=> 'Alle News',
+	'NEWS_REPLY'				=> 'Antworten',
 	'NEWS_IN_FORUM'				=> 'in %s',
 	'NEWS_READ_MORE'			=> 'Weiterlesen',
 	'NEWS_VIEW_TOPIC'			=> 'Thema ansehen',
