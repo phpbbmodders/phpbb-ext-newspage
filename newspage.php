@@ -309,9 +309,13 @@ class newspage
 		}
 
 		$sql_array = array(
-			'SELECT'	=> 't.*, p.*, u.*',
+			'SELECT'	=> 't.*, p.*, u.*, f.forum_name',
 			'FROM'		=> array(TOPICS_TABLE => 't'),
 			'LEFT_JOIN'	=> array(
+				array(
+					'FROM'	=> array(FORUMS_TABLE => 'f'),
+					'ON'	=> 'f.forum_id = t.forum_id',
+				),
 				array(
 					'FROM'	=> array(POSTS_TABLE => 'p'),
 					'ON'	=> 'p.post_id = t.topic_first_post_id',
@@ -347,10 +351,13 @@ class newspage
 
 			$parse_flags = ($row['enable_bbcode'] ? OPTION_FLAG_BBCODE : 0) | ($row['enable_smilies'] ? OPTION_FLAG_SMILIES : 0) | ($row['enable_magic_url'] ? OPTION_FLAG_LINKS : 0);
 			$message = generate_text_for_display($row['post_text'], $row['bbcode_uid'], $row['bbcode_bitfield'], $parse_flags, true);
+			$shortened = false;
 			if (!$this->news && (int) $this->config['news_char_limit'] > 0)
 			{
 				$trimmer = new message_trimmer();
+				$full_message = $message;
 				$message = $trimmer->trim($message, (int) $this->config['news_char_limit']);
+				$shortened = $message !== $full_message;
 			}
 
 			if (!$this->auth->acl_get('f_download', $forum_id))
@@ -482,6 +489,10 @@ class newspage
 				'EDIT_REASON'			=> htmlspecialchars($row['post_edit_reason'], ENT_QUOTES, 'UTF-8', false),
 				'SIGNATURE'				=> ($row['enable_sig']) ? $row['user_sig'] : '',
 				'NEWS_COMMENTS'			=> $this->content_visibility->get_count('topic_posts', $row, $forum_id) - 1,
+				'NEWS_COMMENTS_TEXT'	=> $this->user->lang('NEWS_COMMENTS_COUNT', $this->content_visibility->get_count('topic_posts', $row, $forum_id) - 1),
+				'S_NEWS_SHORTENED'		=> $shortened,
+				'NEWS_FORUM_NAME'		=> isset($row['forum_name']) ? $row['forum_name'] : '',
+				'U_NEWS_FORUM'			=> append_sid("{$this->root_path}viewforum.{$this->php_ext}", 'f=' . $forum_id),
 
 				'POSTER_AVATAR'			=> ($this->user->optionget('viewavatars')) ? $this->get_poster_avatar($row) : '',
 				'U_POST_AUTHOR'			=> get_username_string('profile', $poster_id, $row['username'], $row['user_colour'], $row['post_username']),
