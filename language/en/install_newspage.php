@@ -22,6 +22,6 @@ if (empty($lang) || !is_array($lang))
 }
 
 $lang = array_merge($lang, [
-	'NEWSPAGE_NOT_ENABLEABLE'	=> 'NV Newspage could not be enabled. It needs phpBB 3.3.19 or later, PHP 7.4.0 or later, and the PHP DOM extension.',
+	'NEWSPAGE_NOT_ENABLEABLE'	=> 'NV Newspage could not be enabled. It needs phpBB 3.3.19 or later, PHP 8.3.36 or later, and the PHP DOM extension.',
 	'NEWSPAGE_DISABLE_OLD'		=> 'Disable the old “%s” extension first. Keep its data; do not delete it.',
 ]);
